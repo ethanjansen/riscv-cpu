@@ -1,3 +1,11 @@
+--! {reg: [
+--!   {"bits": 10, "name": "Data", "attr": ["address", "immediate", "offset"]},
+--!   {"bits": 1, "name": "Immediate"},
+--!   {"bits": 2, "name": "general"},
+--!   {"bits": 3, "name": "Function", "attr": ["load", "add", "shift left", "shift right", "and", "or", "xor", "branch", "wait", "seven-segment", "led"]},
+--!   {"bits": 2, "name": "Operation", "attr": ["ALU", "store", "PC", "Display"] }
+--! ]}
+
 -------------------------------------------------------------------------------
 -- Company:        Walla Walla University
 -- Engineer:       Ethan Jansen
