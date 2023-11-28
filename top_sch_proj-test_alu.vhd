@@ -45,6 +45,9 @@ begin
 
   alu : arithmetic_logic_unit port map
   (
-    ctrl => extin, data1_in => sig, data2_in => "11011110101011011011111011101111", --deadbeef
-    data_out => sig_out);
+    ctrl     => extin,
+    data1_in => sig_in,
+    data2_in => "11011110101011011011111011101111", --deadbeef
+    data_out => sig_out
+  );
 end test_alu;
