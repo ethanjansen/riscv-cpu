@@ -25,8 +25,8 @@ use IEEE.NUMERIC_STD.all;
 entity arithmetic_logic_unit is
   port
   (
-    ctrl               : in std_logic_vector(6 downto 0); -- come from high 7 bits of instruction encoding
-    data1_in, data2_in : in std_logic_vector(31 downto 0); -- assuming immediate sign extensions happen outside of alu
+    ctrl               : in std_logic_vector(6 downto 0); --! comes from high 7 bits of instruction encoding
+    data1_in, data2_in : in std_logic_vector(31 downto 0); --! assuming immediate sign extensions happen outside of alu
     data_out           : out std_logic_vector(31 downto 0)
   );
 end arithmetic_logic_unit;
