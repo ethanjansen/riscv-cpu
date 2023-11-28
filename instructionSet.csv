@@ -1,0 +1,29 @@
+orig encoding,opcode,description,symbolic representation,operating section,process
+00 000000nn nnnnnnnn,sw0,Store switches to reg b0,Rn[7:0] = switches,ALU,passthrough with input
+00 000010nn nnnnnnnn,sw1,Store switches to reg b1,Rn[15:8] = switches,ALU,passthrough with input
+00 000100nn nnnnnnnn,sw2,Store switches to reg b0,Rn[7:0] = switches,ALU,passthrough with input
+00 000110nn nnnnnnnn,sw3,Store switches to reg b0,Rn[7:0] = switches,ALU,passthrough with input
+00 0010-0nn nnnnnnnn,add,Add register,A += Rn,ALU,add
+00 0010-1ii iiiiiiii,addi,Add immediate,A += i,ALU,add with input
+00 0100---- --------,shr,Logical right shift,A = A >> 1,ALU,shift right
+00 0101---- --------,shl,Logical left shift,A = A << 1,ALU,shift left
+00 100000nn nnnnnnnn,load,Load from register,A = Rn,ALU,load A
+00 100001ii iiiiiiii,loadi,Load immediate,A = i,ALU,load A with input
+00 100010nn nnnnnnnn,and,AND register,A = A and Rn,ALU,and
+00 100011ii iiiiiiii,andi,AND immediate,A = A and i,ALU,and with input
+00 100100nn nnnnnnnn,or,OR register,A = A or Rn,ALU,or
+00 100101ii iiiiiiii,ori,OR immediate,A = A or i,ALU,or with input
+00 100110nn nnnnnnnn,xor,XOR register,A = A xor Rn,ALU,xor
+00 100111ii iiiiiiii,xori,XOR immediate,A = A xor i,ALU,xor with input
+00 110---nn nnnnnnnn,store,Store to register,Rn = A,ALU,passthrough
+00 111001ii iiiiiiii,ssegi,Display i on sevenseg,sevenseg = i (0000-03ff),ALU,convert with input to output
+00 111000-- --------,ssegl,Display A low on sevenseg,sevenseg = A[15:0],ALU,covert to output
+00 111010-- --------,ssegh,Display A high on sevenseg,sevenseg = A[31:16],ALU,convert to output
+00 111100-- --------,ledl,Display A low on LED,led = A[15:0],ALU,to output
+00 111110-- --------,ledh,Display A high on LED,led = A[31:16],ALU,to putput
+01 111111-- --------,wait,Wait for continue btn,halt while btn = 1,Controller,stay in hold/wait state
+10 00----oo oooooooo,br,Branch unconditional,PC += o (offset),Controller,offset PC
+10 01----oo oooooooo,brz,Branch if zero,if A=0 PC += o,ALU + Controller,get condition offset if true
+10 10----oo oooooooo,brnz,Branch if not zero,if A/=0 PC += o,ALU + Controller,get condition offset if true
+10 11----oo oooooooo,brp,Branch if positive,if A>0 PC += o,ALU + Controller,get condition offset if true
+11 00----oo oooooooo,brn,Branch if negative,if A<0 PC += o,ALU + Controller,get condition offset if true
