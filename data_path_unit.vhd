@@ -31,6 +31,13 @@ entity data_path_unit is
 end data_path_unit;
 
 architecture dpu of data_path_unit is
+  constant sel_store : std_logic_vector(1 downto 0) := "01"; --! used to compare for RAM we
+  constant sel_led   : std_logic_vector(4 downto 0) := "11000"; --! used to compare for LED we
+  constant sel_sseg  : std_logic_vector(4 downto 0) := "11001"; --! used to compare for SSEG we
+
+  signal sig_ram_we, sig_led_we, sig_sseg_we                                   : std_logic; --! 1-bit write enable signals
+  signal sig_d_in, sig_ram_d_out, sig_a_d, sig_a_q, sig_alu_d1_in, sig_display : std_logic_vector(31 downto 0); --! 32-bit data signals
+
   component accumulator is
     port
     (
