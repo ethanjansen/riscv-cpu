@@ -28,10 +28,13 @@ entity sign_extender is
 end sign_extender;
 
 architecture ext of sign_extender is
+  constant sel_load_immediate : std_logic_vector(4 downto 0) := "00000";
+  constant sel_load_switch    : std_logic_vector(4 downto 0) := "00111";
+
   signal data_to_use        : std_logic_vector(9 downto 0); --! Selected data input from Controller or Switches.
   signal ext_7bit, ext_9bit : std_logic_vector(31 downto 0); --! Extensions based on bit x as most significant bit. 
 begin
-  data_to_use <= "00" & data_from_sw_in when ctrl = "00111" else
+  data_to_use <= "00" & data_from_sw_in when ctrl = sel_load_switch else
     data_from_cntrlr_in;
 
   ext_7bit <= X"000000" & data_to_use(7 downto 0) when data_to_use(7) = '0' else
@@ -41,6 +44,6 @@ begin
     "1111111111111111111111" & data_to_use;
 
   with ctrl select
-    data_out <= ext_7bit when "00000" | "00111",
+    data_out <= ext_7bit when sel_load_immediate | sel_load_switch,
     ext_9bit when others;
 end ext;
