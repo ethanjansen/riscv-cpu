@@ -108,5 +108,40 @@ architecture dpu of data_path_unit is
     );
   end component;
 begin
+  -- comparisons
+  sig_ram_we <= '1' when ctrl(7 downto 6) = sel_store else
+    '0';
+  sig_led_we <= '1' when ctrl(7 downto 3) = sel_led else
+    '0';
+  sig_sseg_we <= '1' when ctrl(7 downto 3) = sel_sseg else
+    '0';
 
+  sig_alu_d1_in <= sig_ram_d_out when ctrl(0) = '0' else
+    sig_d_in;
+  sig_display <= sig_a_q when ctrl(0) = '0' else
+    sig_d_in;
+
+  -- port maps
+  a : accumulator port map
+  (
+    clk => clk, d => sig_a_d,
+    q => sig_a_q);
+  alu : arithmetic_logic_unit port
+  map(ctrl => ctrl(7 downto 1), data1_in => sig_alu_d1_in, data2_in => sig_a_q,
+  data_out => sig_a_d);
+  flagger : flag_handler port
+  map(a_in => sig_a_q,
+  flag_out => flags);
+  led_buf : led_handler port
+  map(clk => clk, we => sig_led_we, sel => high_low_sw, data_in => sig_display,
+  led_out => led_out);
+  ram : ram_wf port
+  map(clk => clk, we => sig_ram_we, addr => data_or_addr_in, d_in => sig_a_q,
+  d_out => sig_ram_d_out);
+  sign_ext : sign_extender port
+  map(ctrl => ctrl(7 downto 3), data_from_ctrlr_in => data_or_addr_in, data_from_sw_in => sw_in,
+  data_out => sig_d_in);
+  sseg_buf : sseg_handler port
+  map(clk => clk, we => sig_sseg_we, sel => high_low_sw, data_in => sig_display,
+  anode_out => sseg_anode_out, cathode_out => sseg_cathode_out);
 end dpu;
