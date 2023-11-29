@@ -20,10 +20,10 @@ use IEEE.std_logic_1164.all;
 entity sign_extender is
   port
   (
-    ctrl                : in std_logic_vector(4 downto 0); --! Control Signals: "00000" or "00111" for 8-bit, otherwise 10-bit.
-    data_from_cntrlr_in : in std_logic_vector(9 downto 0); --! 8- to 10-bit Data from Controller
-    data_from_sw_in     : in std_logic_vector(7 downto 0); --! 8-bit Data from Switches
-    data_out            : out std_logic_vector(31 downto 0) --! Data Out
+    ctrl               : in std_logic_vector(4 downto 0); --! Control Signals: "00000" or "00111" for 8-bit, otherwise 10-bit.
+    data_from_ctrlr_in : in std_logic_vector(9 downto 0); --! 8- to 10-bit Data from Controller
+    data_from_sw_in    : in std_logic_vector(7 downto 0); --! 8-bit Data from Switches
+    data_out           : out std_logic_vector(31 downto 0) --! Data Out
   );
 end sign_extender;
 
@@ -35,7 +35,7 @@ architecture ext of sign_extender is
   signal ext_7bit, ext_9bit : std_logic_vector(31 downto 0); --! Extensions based on bit x as most significant bit. 
 begin
   data_to_use <= "00" & data_from_sw_in when ctrl = sel_load_switch else
-    data_from_cntrlr_in;
+    data_from_ctrlr_in;
 
   ext_7bit <= X"000000" & data_to_use(7 downto 0) when data_to_use(7) = '0' else
     X"FFFFFF" & data_to_use(7 downto 0);

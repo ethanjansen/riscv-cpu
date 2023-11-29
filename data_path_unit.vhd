@@ -19,8 +19,10 @@ entity data_path_unit is
   port
   (
     clk              : in std_logic; --! Clock
+    ctrl             : in std_logic_vector(7 downto 0); --! Control Signal from DPU
     data_or_addr_in  : in std_logic_vector(9 downto 0); --! Data or Address in from Controller
     sw_in            : in std_logic_vector(7 downto 0); --! Data in from Switch
+    high_low_sw      : in std_logic; --! High/Low Display Select from sw8
     flags            : out std_logic_vector(1 downto 0); --! Flags based on A (1=>"gt 0", 0=>"lt 0")
     led_out          : out std_logic_vector(15 downto 0); --! LED Output
     sseg_anode_out   : out std_logic_vector(4 downto 0); --! Seven-Segment Display Anode Output (time multiplexed)
@@ -80,10 +82,10 @@ architecture dpu of data_path_unit is
   component sign_extender is
     port
     (
-      ctrl                : in std_logic_vector(4 downto 0); --! Control Signals: "00000" or "00111" for 8-bit, otherwise 10-bit.
-      data_from_cntrlr_in : in std_logic_vector(9 downto 0); --! 8- to 10-bit Data from Controller
-      data_from_sw_in     : in std_logic_vector(7 downto 0); --! 8-bit Data from Switches
-      data_out            : out std_logic_vector(31 downto 0) --! Data Out
+      ctrl               : in std_logic_vector(4 downto 0); --! Control Signals: "00000" or "00111" for 8-bit, otherwise 10-bit.
+      data_from_ctrlr_in : in std_logic_vector(9 downto 0); --! 8- to 10-bit Data from Controller
+      data_from_sw_in    : in std_logic_vector(7 downto 0); --! 8-bit Data from Switches
+      data_out           : out std_logic_vector(31 downto 0) --! Data Out
     );
   end component;
 
@@ -98,7 +100,6 @@ architecture dpu of data_path_unit is
       cathode_out : out std_logic_vector(7 downto 0) --! Cathode Output
     );
   end component;
-
 begin
 
 end dpu;
