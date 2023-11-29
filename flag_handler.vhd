@@ -19,14 +19,16 @@ use IEEE.std_logic_1164.all;
 entity flag_handler is
   port
   (
-    a_in     : in std_logic_vector(31 downto 0);
-    flag_out : out std_logic_vector(1 downto 0)
+    a_in     : in std_logic_vector(31 downto 0); --! Accumulator data in
+    flag_out : out std_logic_vector(1 downto 0) --! Flag out
   );
 end flag_handler;
 
 architecture flags of flag_handler is
 
 begin
-    flag_out(1) <= '1' when (a_in(31)='0' and a_in(30 downto 0)/="0000000000000000000000000000000") else '0';
-    flag_out(0) <= '1' when a_in(31)='1' else '0';
+  flag_out(1) <= '1' when (a_in(31) = '0' and a_in(30 downto 0) /= "0000000000000000000000000000000") else
+  '0';
+  flag_out(0) <= '1' when a_in(31) = '1' else
+  '0';
 end flags;
