@@ -51,7 +51,7 @@ NET "sw<5>" LOC = "H1"  | IOSTANDARD=LVCMOS33;  #u2-31
 NET "sw<6>" LOC = "J4"  | IOSTANDARD=LVCMOS33;  #u2-30 [AD7P]
 NET "sw<7>" LOC = "H4"  | IOSTANDARD=LVCMOS33;  #u2-29 [AD7N]
 #
-#NET "sw8" LOC = "P1"    | IOSTANDARD=LVCMOS33;	 #u2-55
+NET "sw8" LOC = "P1"    | IOSTANDARD=LVCMOS33;	 #u2-55
 #
 #    NOTE: Buttons (btn) are momentary push buttons
 #          Pressing a button = logic '0'
