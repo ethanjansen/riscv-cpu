@@ -36,8 +36,8 @@ begin
     if rising_edge(clk) then
       if reset = '1' then
         count_buf <= to_signed(0, 12);
-		elsif br = '1' then
-          count_buf <= count_buf + signed(jump_value) - 1; -- Careful! Will allow overflow
+      elsif br = '1' then
+        count_buf <= count_buf + signed(jump_value) - 1; -- Careful! Will allow overflow
       elsif en = '1' then
         count_buf <= count_buf + 1;
         if count_buf(11) = '1' then -- reset to 0 after counting passed 2047
