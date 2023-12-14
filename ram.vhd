@@ -28,7 +28,7 @@ entity ram_wf is
 end ram_wf;
 
 architecture ram_arch of ram_wf is
-  type ram_type is array(1023 downto 0) of std_logic_vector(31 downto 0);
+  type ram_type is array(0 to 1023) of std_logic_vector(31 downto 0);
   signal ram : ram_type;
 begin
   process (clk)

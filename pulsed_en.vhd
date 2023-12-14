@@ -32,9 +32,11 @@ begin
   -- counter
   process (clk)
   begin
-    medium_count_reg <= medium_count_reg + 1;
-    if medium_count_reg = 0 then
-      slow_count_reg <= slow_count_reg + 1;
+    if rising_edge(clk) then
+      medium_count_reg <= medium_count_reg + 1;
+      if medium_count_reg = 0 then
+        slow_count_reg <= slow_count_reg + 1;
+      end if;
     end if;
   end process;
 
