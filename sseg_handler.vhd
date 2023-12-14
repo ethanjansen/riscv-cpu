@@ -60,8 +60,9 @@ begin
   map(hex => data_in(11 downto 8), seg => cath_internal2);
   lut3 : hex4_to_7segment port
   map(hex => data_in(15 downto 12), seg => cath_internal3);
-  lut4 : hex4_to_7segment port map
-    (hex => data_in(19 downto 16), seg => cath_internal4);
+  lut4 : hex4_to_7segment port
+  map
+  (hex => data_in(19 downto 16), seg => cath_internal4);
   lut5 : hex4_to_7segment port
   map(hex => data_in(23 downto 20), seg => cath_internal5);
   lut6 : hex4_to_7segment port
@@ -82,9 +83,10 @@ begin
   -- get counter value
   counter : counter_2bit port
   map (clk => clk, count => cnt);
-  
+
   -- display high or low bits based on sel
-  half_data <= display_data_buf(63 downto 32) when sel = '1' else display_data_buf(31 downto 0);
+  half_data <= display_data_buf(63 downto 32) when sel = '1' else
+    display_data_buf(31 downto 0);
 
   -- specify which digit to output to cathodes based on cnt
   with cnt select -- 0: 1s, 1: 16s, 2: 256s, 3: 4096s

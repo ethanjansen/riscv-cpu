@@ -18,8 +18,7 @@ use IEEE.std_logic_1164.all;
 entity controller is
   port
   (
-    led			: out std_logic_vector(15 downto 0);
-	 clk        : in std_logic; --! Clock
+    clk        : in std_logic; --! Clock
     ctrl_btns  : in std_logic_vector(2 downto 0); --! Buttons for reset (0), continue (1), and sstep (2)
     alu_flags  : in std_logic_vector(1 downto 0); --! Flags from ALU
     d_addr_out : out std_logic_vector(9 downto 0); --! Data and Addr out for DPU
@@ -74,8 +73,7 @@ architecture ctrlr of controller is
   component controller_fsm is
     port
     (
-      led : out std_logic_vector(3 downto 0);
-		clk                             : in std_logic; --! Clock
+      clk                             : in std_logic; --! Clock
       continue                        : in std_logic; --! Continue
       reset                           : in std_logic; --! Reset
       sstep, sstep_set_read           : in std_logic; --! Single Step
@@ -89,7 +87,6 @@ architecture ctrlr of controller is
     );
   end component;
 begin
-	led(11 downto 0) <= '0' & sig_pc_count;
   -- port mappings
   pc : program_counter port map
     (clk => clk, reset => sig_pc_reset, en => sig_pc_en, br => sig_pc_br, jump_value => sig_pc_offset, count => sig_pc_count);
@@ -98,5 +95,5 @@ begin
   sstep_handler : sstep_flag_handler port
   map(clk => clk, clear => sig_sstep_clear, set => sig_sstep_set_load, val => sig_sstep_val);
   fsm : controller_fsm port
-  map(led=>led(15 downto 12), clk => clk, continue => ctrl_btns(1), reset => ctrl_btns(0), sstep => ctrl_btns(2), sstep_set_read => sig_sstep_val, alu_flags => alu_flags, pmem_in => sig_pmem_d, pc_en => sig_pc_en, pmem_en => sig_pmem_en, pc_br => sig_pc_br, pc_reset => sig_pc_reset, sstep_set_load => sig_sstep_set_load, sstep_clear => sig_sstep_clear, pc_offset => sig_pc_offset, d_addr_out => d_addr_out, ctrl => ctrl);
+  map(clk => clk, continue => ctrl_btns(1), reset => ctrl_btns(0), sstep => ctrl_btns(2), sstep_set_read => sig_sstep_val, alu_flags => alu_flags, pmem_in => sig_pmem_d, pc_en => sig_pc_en, pmem_en => sig_pmem_en, pc_br => sig_pc_br, pc_reset => sig_pc_reset, sstep_set_load => sig_sstep_set_load, sstep_clear => sig_sstep_clear, pc_offset => sig_pc_offset, d_addr_out => d_addr_out, ctrl => ctrl);
 end ctrlr;

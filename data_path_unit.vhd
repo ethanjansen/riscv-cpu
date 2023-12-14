@@ -121,7 +121,6 @@ begin
   sig_display <= sig_a_q when ctrl(0) = '0' else
     sig_d_in;
 
-	--led_out <= sig_a_q(15 downto 0);-- test
   -- port maps
   a : accumulator port map
   (
@@ -133,9 +132,9 @@ begin
   flagger : flag_handler port
   map(a_in => sig_a_q,
   flag_out => flags);
-  --led_buf : led_handler port
-  --map(clk => clk, we => sig_led_we, sel => high_low_sw, data_in => sig_display,
-  --led_out => led_out);
+  led_buf : led_handler port
+  map(clk => clk, we => sig_led_we, sel => high_low_sw, data_in => sig_display,
+  led_out => led_out);
   ram : ram_wf port
   map(clk => clk, we => sig_ram_we, addr => data_or_addr_in, d_in => sig_a_q,
   d_out => sig_ram_d_out);

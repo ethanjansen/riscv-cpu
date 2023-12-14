@@ -19,8 +19,7 @@ use IEEE.std_logic_1164.all;
 entity controller_fsm is
   port
   (
-    led : out std_logic_vector(3 downto 0);
-	 clk                             : in std_logic; --! Clock
+    clk                             : in std_logic; --! Clock
     continue                        : in std_logic; --! Continue
     reset                           : in std_logic; --! Reset
     sstep, sstep_set_read           : in std_logic; --! Single Step
@@ -46,7 +45,7 @@ architecture fsm of controller_fsm is
   constant reg_read_state        : std_logic_vector(3 downto 0) := "0111";
   constant wait_state            : std_logic_vector(3 downto 0) := "1000";
   constant sstep_state           : std_logic_vector(3 downto 0) := "1001";
-  constant display_state			: std_logic_vector(3 downto 0) := "1010";
+  constant display_state         : std_logic_vector(3 downto 0) := "1010";
   signal state_reg, state_next   : std_logic_vector(3 downto 0); --! state signals
   signal do_branch               : std_logic; --! computed based on op1_in and alu flags
 
@@ -73,7 +72,7 @@ begin
           state_next <= pc_inc_state;
         when choose_state =>
           if pmem_in(17 downto 16) = "11" then -- display (optionally go to wait)
-			   state_next <= display_state;
+            state_next <= display_state;
           elsif pmem_in(17 downto 12) = "101111" then -- wait
             state_next <= wait_state;
           elsif do_branch = '1' then -- branch
@@ -109,14 +108,14 @@ begin
   process (state_reg)
   begin
     -- init
-	 pc_en <= '0';
-	 pmem_en <= '0';
-	 pc_reset <= '0';
-	 pc_br <= '0';
-	 sstep_clear <= '0';
-	 sstep_set_load <= '0';
-  
-	 -- logic
+    pc_en          <= '0';
+    pmem_en        <= '0';
+    pc_reset       <= '0';
+    pc_br          <= '0';
+    sstep_clear    <= '0';
+    sstep_set_load <= '0';
+
+    -- logic
     case state_reg is
       when pc_inc_state =>
         pc_en   <= '1';
@@ -135,10 +134,10 @@ begin
 
   -- conditionally pass (DPU)
   with state_reg select
-		ctrl <= "11111111" when pc_inc_state|choose_state|wait_state|sstep_state, -- ALU should passthrough invalid code
-		pmem_in(17 downto 10) when others;
+    ctrl <= "11111111" when pc_inc_state | choose_state | wait_state | sstep_state, -- ALU should passthrough invalid code
+    pmem_in(17 downto 10) when others;
   -- always pass (DPU memory)
-		d_addr_out <= pmem_in(9 downto 0);
+  d_addr_out <= pmem_in(9 downto 0);
   -- always pass (PC)
   pc_offset <= pmem_in(11 downto 0);
 
@@ -149,6 +148,4 @@ begin
     (pmem_in(17 downto 12) = "100011" and alu_flags = "10") or
     (pmem_in(17 downto 12) = "100100" and alu_flags = "01") else
     '0';
-	 
-	 led <= state_reg;
 end fsm;

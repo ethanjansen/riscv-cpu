@@ -28,18 +28,18 @@ entity ram_wf is
 end ram_wf;
 
 architecture ram_arch of ram_wf is
-    type ram_type is array(1023 downto 0) of std_logic_vector(31 downto 0);
-    signal ram : ram_type;
+  type ram_type is array(1023 downto 0) of std_logic_vector(31 downto 0);
+  signal ram : ram_type;
 begin
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if we = '1' then
-                ram(to_integer(unsigned(addr))) <= d_in;
-                d_out <= d_in;
-            else
-                d_out <= ram(to_integer(unsigned(addr)));
-            end if;
-        end if;
-    end process;
+  process (clk)
+  begin
+    if rising_edge(clk) then
+      if we = '1' then
+        ram(to_integer(unsigned(addr))) <= d_in;
+        d_out                           <= d_in;
+      else
+        d_out <= ram(to_integer(unsigned(addr)));
+      end if;
+    end if;
+  end process;
 end ram_arch;

@@ -32,7 +32,7 @@ architecture rom of rom_with_init is
   type rom_type is array(0 to 2047) of std_logic_vector(17 downto 0);
 
   impure function initRomFromFile(romFileName : in string) return rom_type is
-    FILE romFile                                : text is in romFileName;
+    file romFile                                : text is in romFileName;
     variable romFileLine                        : line;
     variable rom                                : rom_type;
   begin

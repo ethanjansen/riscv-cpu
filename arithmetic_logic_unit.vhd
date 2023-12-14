@@ -32,18 +32,18 @@ entity arithmetic_logic_unit is
 end arithmetic_logic_unit;
 
 architecture alu of arithmetic_logic_unit is
-  constant sel_load                                                                             : std_logic_vector(6 downto 0) := "0000000";
-  constant sel_load_b1                                                                          : std_logic_vector(6 downto 0) := "0000001";
-  constant sel_load_b2                                                                          : std_logic_vector(6 downto 0) := "0000010";
-  constant sel_load_b3                                                                          : std_logic_vector(6 downto 0) := "0000011";
-  constant sel_add                                                                              : std_logic_vector(6 downto 0) := "0000100";
-  constant sel_shiftr                                                                           : std_logic_vector(6 downto 0) := "0001000";
-  constant sel_shiftl                                                                           : std_logic_vector(6 downto 0) := "0001100";
-  constant sel_and                                                                              : std_logic_vector(6 downto 0) := "0010000";
-  constant sel_or                                                                               : std_logic_vector(6 downto 0) := "0010100";
-  constant sel_xor                                                                              : std_logic_vector(6 downto 0) := "0011000";
-  signal sig_load_b1, sig_load_b2, sig_load_b3 																	: std_logic_vector(31 downto 0);
-  signal sig_add, sig_shiftr, sig_shiftl, sig_and, sig_or, sig_xor                              : std_logic_vector(31 downto 0);
+  constant sel_load                                                : std_logic_vector(6 downto 0) := "0000000";
+  constant sel_load_b1                                             : std_logic_vector(6 downto 0) := "0000001";
+  constant sel_load_b2                                             : std_logic_vector(6 downto 0) := "0000010";
+  constant sel_load_b3                                             : std_logic_vector(6 downto 0) := "0000011";
+  constant sel_add                                                 : std_logic_vector(6 downto 0) := "0000100";
+  constant sel_shiftr                                              : std_logic_vector(6 downto 0) := "0001000";
+  constant sel_shiftl                                              : std_logic_vector(6 downto 0) := "0001100";
+  constant sel_and                                                 : std_logic_vector(6 downto 0) := "0010000";
+  constant sel_or                                                  : std_logic_vector(6 downto 0) := "0010100";
+  constant sel_xor                                                 : std_logic_vector(6 downto 0) := "0011000";
+  signal sig_load_b1, sig_load_b2, sig_load_b3                     : std_logic_vector(31 downto 0);
+  signal sig_add, sig_shiftr, sig_shiftl, sig_and, sig_or, sig_xor : std_logic_vector(31 downto 0);
 begin
   -- signals all calculated to be muxed via ctrl
   -- loads (sig_load_regiser = sig_load_b0 = data1_in)
