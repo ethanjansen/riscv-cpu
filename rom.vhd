@@ -19,34 +19,38 @@ use IEEE.std_logic_textio.all;
 use std.textio.all;
 
 entity rom_with_init is
-    port(
-        clk : in std_logic; --! Clock
-        addr : in std_logic_vector(10 downto 0); --! Address
-        d   : out std_logic_vector(17 downto 0) --! Data Out
-    );
+  port
+  (
+    clk  : in std_logic; --! Clock
+    en   : in std_logic; --! Enable
+    addr : in std_logic_vector(10 downto 0); --! Address
+    d    : out std_logic_vector(17 downto 0) --! Data Out
+  );
 end rom_with_init;
 
 architecture rom of rom_with_init is
-    type rom_type is array(2047 downto 0) of std_logic_vector(17 downto 0);
+  type rom_type is array(2047 downto 0) of std_logic_vector(17 downto 0);
 
-    impure function initRomFromFile(romFileName : in string) return rom_type is
-        file romFile : text is in romFileName;
-        variable romFileLine : line;
-        variable rom : rom_type;
-    begin
-        for i in rom_type'range loop
-            readline(romFile, romFileLine);
-            read(romFileLine, rom(i));
-        end loop;
-        return rom;
-    end function;
+  impure function initRomFromFile(romFileName : in string) return rom_type is
+    file romFile                                : text is in romFileName;
+    variable romFileLine                        : line;
+    variable rom                                : rom_type;
+  begin
+    for i in rom_type'range loop
+      readline(romFile, romFileLine);
+      read(romFileLine, rom(i));
+    end loop;
+    return rom;
+  end function;
 
-    signal rom : rom_type := initRomFromFile("rom.data");
+  signal rom : rom_type := initRomFromFile("rom.data");
 begin
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            d <= rom(to_integer(unsigned(addr)));
-        end if;
-    end process;
+  process (clk)
+  begin
+    if rising_edge(clk) then
+      if en = '1' then
+        d <= rom(to_integer(unsigned(addr)));
+      end if;
+    end if;
+  end process;
 end rom;

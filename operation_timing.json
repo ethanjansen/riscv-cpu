@@ -1,0 +1,746 @@
+{
+    "signal": [
+        {
+            "name": "clk",
+            "wave": "p...................",
+            "period": 1
+        },
+        [
+            "ALU With Register",
+            [
+                "PC",
+                {
+                    "name": "en",
+                    "wave": "1......."
+                },
+                {
+                    "name": "reset",
+                    "wave": "0......."
+                },
+                {
+                    "name": "br",
+                    "wave": "0......."
+                },
+                {
+                    "name": "jump_value",
+                    "wave": "x.......",
+                    "data": []
+                },
+                {
+                    "name": "count",
+                    "wave": "23456789",
+                    "data": [
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7"
+                    ]
+                }
+            ],
+            [
+                "PMEM ROM",
+                {
+                    "name": "addr",
+                    "wave": "23456789",
+                    "data": [
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7"
+                    ]
+                },
+                {
+                    "name": "d",
+                    "wave": "x.2345x.",
+                    "data": [
+                        "D1",
+                        "D2",
+                        "D3",
+                        "D4"
+                    ]
+                }
+            ],
+            [
+                "DPU",
+                {
+                    "name": "d/addr_in",
+                    "wave": "x.2345x.",
+                    "data": [
+                        "o1",
+                        "o2",
+                        "o3",
+                        "o4"
+                    ]
+                },
+                [
+                    "REG RAM",
+                    {
+                        "name": "we",
+                        "wave": "x.0....."
+                    },
+                    {
+                        "name": "addr",
+                        "wave": "x.2345x.",
+                        "data": [
+                            "o1",
+                            "o2",
+                            "o3",
+                            "o4"
+                        ]
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "x..62345",
+                        "data": [
+                            "a",
+                            "a1",
+                            "a2",
+                            "a3",
+                            "a4"
+                        ]
+                    },
+                    {
+                        "name": "d_out",
+                        "wave": "x..2345x",
+                        "data": [
+                            "d1",
+                            "d2",
+                            "d3",
+                            "d4"
+                        ]
+                    }
+                ],
+                [
+                    "A",
+                    {
+                        "name": "d",
+                        "wave": "x..2345x",
+                        "data": [
+                            "a1",
+                            "a2",
+                            "a3",
+                            "a4"
+                        ]
+                    },
+                    {
+                        "name": "q",
+                        "wave": "x..62345",
+                        "data": [
+                            "a",
+                            "a1",
+                            "a2",
+                            "a3",
+                            "a4"
+                        ]
+                    }
+                ],
+                [
+                    "LED/SSEG",
+                    {
+                        "name": "we",
+                        "wave": "x.0....."
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "x..62345",
+                        "data": [
+                            "a",
+                            "a1",
+                            "a2",
+                            "a3",
+                            "a4"
+                        ]
+                    }
+                ]
+            ]
+        ],
+        [
+            "ALU Without Register",
+            [
+                "PC",
+                {
+                    "name": "en",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "reset",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "br",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "jump_value",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "count",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "PMEM ROM",
+                {
+                    "name": "addr",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                {
+                    "name": "d",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "DPU",
+                {
+                    "name": "d/addr_in",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                [
+                    "REG RAM",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "addr",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_out",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "A",
+                    {
+                        "name": "d",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "q",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "LED/SSEG",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ]
+            ]
+        ],
+        [
+            "Store",
+            [
+                "PC",
+                {
+                    "name": "en",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "reset",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "br",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "jump_value",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "count",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "PMEM ROM",
+                {
+                    "name": "addr",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                {
+                    "name": "d",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "DPU",
+                {
+                    "name": "d/addr_in",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                [
+                    "REG RAM",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "addr",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_out",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "A",
+                    {
+                        "name": "d",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "q",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "LED/SSEG",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ]
+            ]
+        ],
+        [
+            "Wait",
+            [
+                "PC",
+                {
+                    "name": "en",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "reset",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "br",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "jump_value",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "count",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "PMEM ROM",
+                {
+                    "name": "addr",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                {
+                    "name": "d",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "DPU",
+                {
+                    "name": "d/addr_in",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                [
+                    "REG RAM",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "addr",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_out",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "A",
+                    {
+                        "name": "d",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "q",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "LED/SSEG",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ]
+            ]
+        ],
+        [
+            "SSEG/LED Display",
+            [
+                "PC",
+                {
+                    "name": "en",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "reset",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "br",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "jump_value",
+                    "wave": "2.34......2........."
+                },
+                {
+                    "name": "count",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "PMEM ROM",
+                {
+                    "name": "addr",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                {
+                    "name": "d",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                }
+            ],
+            [
+                "DPU",
+                {
+                    "name": "d/addr_in",
+                    "wave": "2.34......2.........",
+                    "data": [
+                        "hold",
+                        "load",
+                        "send",
+                        "hold"
+                    ]
+                },
+                [
+                    "REG RAM",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "addr",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "d_out",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "A",
+                    {
+                        "name": "d",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    },
+                    {
+                        "name": "q",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ],
+                [
+                    "LED/SSEG",
+                    {
+                        "name": "we",
+                        "wave": "2.34......2........."
+                    },
+                    {
+                        "name": "d_in",
+                        "wave": "2.34......2.........",
+                        "data": [
+                            "hold",
+                            "load",
+                            "send",
+                            "hold"
+                        ]
+                    }
+                ]
+            ]
+        ]
+    ]
+}

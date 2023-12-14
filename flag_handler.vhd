@@ -20,7 +20,7 @@ entity flag_handler is
   port
   (
     a_in     : in std_logic_vector(31 downto 0); --! Accumulator data in
-    flag_out : out std_logic_vector(1 downto 0) --! Flag out
+    flag_out : out std_logic_vector(1 downto 0) --! Flag out (high bit if positive, low bit if negative)
   );
 end flag_handler;
 
