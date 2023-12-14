@@ -20,6 +20,7 @@ entity counter_2bit is
   port
   (
     clk   : in std_logic; --! Clock
+	 en	 : in std_logic; --! Enable
     count : out std_logic_vector(1 downto 0) --! Counter Value
   );
 end counter_2bit;
@@ -30,7 +31,9 @@ begin
   process (clk)
   begin
     if rising_edge(clk) then
-      count_buf <= count_buf + 1;
+		if en = '1' then
+			count_buf <= count_buf + 1;
+		end if;
     end if;
   end process;
   count <= std_logic_vector(count_buf);

@@ -19,6 +19,7 @@ entity data_path_unit is
   port
   (
     clk              : in std_logic; --! Clock
+	 pulsed_en		  : in std_logic; --! pulsed en for sseg multiplexing
     ctrl             : in std_logic_vector(7 downto 0); --! Control Signal from DPU
     data_or_addr_in  : in std_logic_vector(9 downto 0); --! Data or Address in from Controller
     sw_in            : in std_logic_vector(7 downto 0); --! Data in from Switch
@@ -100,6 +101,7 @@ architecture dpu of data_path_unit is
     port
     (
       clk         : in std_logic; --! Clock
+		pulsed_en	: in std_logic; --! to reduce multiplexing
       we          : in std_logic; --! Write Enable
       sel         : in std_logic; --! 1-bit Select for ('1') high bytes or ('0') low bytes.
       data_in     : in std_logic_vector(31 downto 0); --! Data Input
@@ -142,6 +144,6 @@ begin
   map(ctrl => ctrl(7 downto 3), data_from_ctrlr_in => data_or_addr_in, data_from_sw_in => sw_in,
   data_out => sig_d_in);
   sseg_buf : sseg_handler port
-  map(clk => clk, we => sig_sseg_we, sel => high_low_sw, data_in => sig_display,
+  map(clk => clk, pulsed_en => pulsed_en, we => sig_sseg_we, sel => high_low_sw, data_in => sig_display,
   anode_out => sseg_anode_out, cathode_out => sseg_cathode_out);
 end dpu;

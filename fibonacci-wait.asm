@@ -4,6 +4,7 @@
         store r5     r5 holds f[n-1]
         
 loop:   ssegl
+	ledl
         wait
 	store r7     push
         load r5      move r5 -> r6

@@ -20,6 +20,7 @@ entity sseg_handler is
   port
   (
     clk         : in std_logic; --! Clock
+	 pulsed_en	 : in std_logic; --! to reduce multiplexing
     we          : in std_logic; --! Write Enable
     sel         : in std_logic; --! 1-bit Select for ('1') high bytes or ('0') low bytes.
     data_in     : in std_logic_vector(31 downto 0); --! Data Input
@@ -47,6 +48,7 @@ architecture sseg of sseg_handler is
     port
     (
       clk   : in std_logic; --! Clock
+		en		: in std_logic; --! Enable
       count : out std_logic_vector(1 downto 0) --! Counter Value
     );
   end component;
@@ -82,7 +84,7 @@ begin
 
   -- get counter value
   counter : counter_2bit port
-  map (clk => clk, count => cnt);
+  map (clk => clk, en => pulsed_en,  count => cnt);
 
   -- display high or low bits based on sel
   half_data <= display_data_buf(63 downto 32) when sel = '1' else
