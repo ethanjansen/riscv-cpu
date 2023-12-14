@@ -42,7 +42,7 @@ architecture alu of arithmetic_logic_unit is
   constant sel_and                                                                              : std_logic_vector(6 downto 0) := "0010000";
   constant sel_or                                                                               : std_logic_vector(6 downto 0) := "0010100";
   constant sel_xor                                                                              : std_logic_vector(6 downto 0) := "0011000";
-  signal sig_passthrough, sig_load_register, sig_load_b0, sig_load_b1, sig_load_b2, sig_load_b3 : std_logic_vector(31 downto 0);
+  signal sig_load_b1, sig_load_b2, sig_load_b3 																	: std_logic_vector(31 downto 0);
   signal sig_add, sig_shiftr, sig_shiftl, sig_and, sig_or, sig_xor                              : std_logic_vector(31 downto 0);
 begin
   -- signals all calculated to be muxed via ctrl

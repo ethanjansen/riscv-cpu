@@ -19,7 +19,8 @@ use IEEE.std_logic_1164.all;
 entity controller_fsm is
   port
   (
-    clk                             : in std_logic; --! Clock
+    led : out std_logic_vector(3 downto 0);
+	 clk                             : in std_logic; --! Clock
     continue                        : in std_logic; --! Continue
     reset                           : in std_logic; --! Reset
     sstep, sstep_set_read           : in std_logic; --! Single Step
@@ -45,8 +46,7 @@ architecture fsm of controller_fsm is
   constant reg_read_state        : std_logic_vector(3 downto 0) := "0111";
   constant wait_state            : std_logic_vector(3 downto 0) := "1000";
   constant sstep_state           : std_logic_vector(3 downto 0) := "1001";
-  constant wait_copy_state       : std_logic_vector(3 downto 0) := "1010";
-  constant sstep_copy_state      : std_logic_vector(3 downto 0) := "1011";
+  constant display_state			: std_logic_vector(3 downto 0) := "1010";
   signal state_reg, state_next   : std_logic_vector(3 downto 0); --! state signals
   signal do_branch               : std_logic; --! computed based on op1_in and alu flags
 
@@ -73,11 +73,7 @@ begin
           state_next <= pc_inc_state;
         when choose_state =>
           if pmem_in(17 downto 16) = "11" then -- display (optionally go to wait)
-            if sstep_set_read = '1' then
-              state_next <= wait_state;
-            else
-              state_next <= pc_inc_state;
-            end if;
+			   state_next <= display_state;
           elsif pmem_in(17 downto 12) = "101111" then -- wait
             state_next <= wait_state;
           elsif do_branch = '1' then -- branch
@@ -89,14 +85,6 @@ begin
           else -- ALU 4step
             state_next <= reg_read_state;
           end if;
-        when branch_pc_inc_state => -- figure out sstep
-          if sstep_set_read = '1' then
-            state_next <= wait_copy_state; -- go to wait copy
-          else
-            state_next <= branch_pmem_en_state;
-          end if;
-        when branch_pmem_en_state =>
-          state_next <= choose_state;
         when wait_state =>
           if continue = '1' then
             state_next <= pc_inc_state;
@@ -105,19 +93,9 @@ begin
           else
             state_next <= state_reg;
           end if;
-        when wait_copy_state => -- copy of wait
-          if continue = '1' then
-            state_next <= branch_pmem_en_state;
-          elsif sstep = '1' then
-            state_next <= sstep_copy_state;
-          else
-            state_next <= state_reg;
-          end if;
         when sstep_state =>
           state_next <= pc_inc_state;
-        when sstep_copy_state =>
-          state_next <= branch_pmem_en_state;
-        when others => -- reg_write, extra_for_3step, reg_read
+        when others => -- reg_write, extra_for_3step, reg_read, branch_pc_inc, display state
           if sstep_set_read = '1' then
             state_next <= wait_state;
           else
@@ -130,6 +108,15 @@ begin
   -- output logic
   process (state_reg)
   begin
+    -- init
+	 pc_en <= '0';
+	 pmem_en <= '0';
+	 pc_reset <= '0';
+	 pc_br <= '0';
+	 sstep_clear <= '0';
+	 sstep_set_load <= '0';
+  
+	 -- logic
     case state_reg is
       when pc_inc_state =>
         pc_en   <= '1';
@@ -138,31 +125,30 @@ begin
         pc_reset <= '1';
       when branch_pc_inc_state =>
         pc_br <= '1';
-      when branch_pmem_en_state =>
-        pmem_en <= '1';
       when wait_state =>
-        sstep_clear <= '1';
-      when wait_copy_state =>
         sstep_clear <= '1';
       when sstep_state =>
         sstep_set_load <= '1';
-      when sstep_copy_state =>
-        sstep_set_load <= '1';
-      when others => -- choose, reg_write, extra_for_3step, reg_read
+      when others => -- choose, reg_write, extra_for_3step, reg_read, display
     end case;
   end process;
 
-  -- always pass (DPU)
-  ctrl       <= pmem_in(17 downto 10);
-  d_addr_out <= pmem_in(9 downto 0);
+  -- conditionally pass (DPU)
+  with state_reg select
+		ctrl <= "11111111" when pc_inc_state|choose_state|wait_state|sstep_state, -- ALU should passthrough invalid code
+		pmem_in(17 downto 10) when others;
+  -- always pass (DPU memory)
+		d_addr_out <= pmem_in(9 downto 0);
   -- always pass (PC)
   pc_offset <= pmem_in(11 downto 0);
 
   -- signal assignments
-  do_branch <= '1' when (pmem_in(15 downto 12) = "0000") or
-    (pmem_in(15 downto 12) = "0001" and alu_flags = "00") or
-    (pmem_in(15 downto 12) = "0010" and alu_flags /= "00") or
-    (pmem_in(15 downto 12) = "0011" and alu_flags = "10") or
-    (pmem_in(15 downto 12) = "0100" and alu_flags = "01") else
+  do_branch <= '1' when (pmem_in(17 downto 12) = "100000") or
+    (pmem_in(17 downto 12) = "100001" and alu_flags = "00") or
+    (pmem_in(17 downto 12) = "100010" and alu_flags /= "00") or
+    (pmem_in(17 downto 12) = "100011" and alu_flags = "10") or
+    (pmem_in(17 downto 12) = "100100" and alu_flags = "01") else
     '0';
+	 
+	 led <= state_reg;
 end fsm;

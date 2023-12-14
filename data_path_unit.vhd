@@ -32,8 +32,8 @@ end data_path_unit;
 
 architecture dpu of data_path_unit is
   constant sel_store : std_logic_vector(1 downto 0) := "01"; --! used to compare for RAM we
-  constant sel_led   : std_logic_vector(4 downto 0) := "11000"; --! used to compare for LED we
-  constant sel_sseg  : std_logic_vector(4 downto 0) := "11001"; --! used to compare for SSEG we
+  constant sel_led   : std_logic_vector(4 downto 0) := "11001"; --! used to compare for LED we
+  constant sel_sseg  : std_logic_vector(4 downto 0) := "11000"; --! used to compare for SSEG we
 
   signal sig_ram_we, sig_led_we, sig_sseg_we                                   : std_logic; --! 1-bit write enable signals
   signal sig_d_in, sig_ram_d_out, sig_a_d, sig_a_q, sig_alu_d1_in, sig_display : std_logic_vector(31 downto 0); --! 32-bit data signals
@@ -121,6 +121,7 @@ begin
   sig_display <= sig_a_q when ctrl(0) = '0' else
     sig_d_in;
 
+	--led_out <= sig_a_q(15 downto 0);-- test
   -- port maps
   a : accumulator port map
   (
@@ -132,9 +133,9 @@ begin
   flagger : flag_handler port
   map(a_in => sig_a_q,
   flag_out => flags);
-  led_buf : led_handler port
-  map(clk => clk, we => sig_led_we, sel => high_low_sw, data_in => sig_display,
-  led_out => led_out);
+  --led_buf : led_handler port
+  --map(clk => clk, we => sig_led_we, sel => high_low_sw, data_in => sig_display,
+  --led_out => led_out);
   ram : ram_wf port
   map(clk => clk, we => sig_ram_we, addr => data_or_addr_in, d_in => sig_a_q,
   d_out => sig_ram_d_out);

@@ -28,18 +28,17 @@ entity led_handler is
 end led_handler;
 
 architecture leds of led_handler is
-
+signal led_buf : std_logic_vector(31 downto 0); --! memory for LEDs
 begin
   process (clk)
   begin
     if rising_edge(clk) then
       if we = '1' then
-        if sel = '1' then
-          led_out <= data_in(31 downto 16);
-        else
-          led_out <= data_in(15 downto 0);
-        end if;
+        led_buf <= data_in;
       end if;
     end if;
   end process;
+  
+  -- output
+  led_out <= led_buf(31 downto 16) when sel = '1' else led_buf(15 downto 0);
 end leds;

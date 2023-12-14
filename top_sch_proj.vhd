@@ -37,6 +37,8 @@ entity top_sch_proj is
 end top_sch_proj;
 
 architecture main of top_sch_proj is
+  signal inversebtns : std_logic_vector(2 downto 0);
+
   signal clk : std_logic; --! Used with slowclock
 
   signal sig_alu_flags : std_logic_vector(1 downto 0); --! From DPU ALU Flags to Controller FSM
@@ -71,6 +73,7 @@ architecture main of top_sch_proj is
   component controller is
     port
     (
+	   led		: out std_logic_vector(15 downto 0);
       clk        : in std_logic; --! Clock
       ctrl_btns  : in std_logic_vector(2 downto 0); --! Buttons for reset (0), continue (1), and sstep (2)
       alu_flags  : in std_logic_vector(1 downto 0); --! Flags from ALU
@@ -79,11 +82,13 @@ architecture main of top_sch_proj is
     );
   end component;
 begin
+  inversebtns <= not btn;
+
   clock : slow_clock generic
-  map (clk_div_half => 499999) port map
+  map (clk_div_half => 24999999) port map
   (mclk => mclk, slwclk => clk);
   ctrlr : controller port
-  map(clk => clk, ctrl_btns => btn, alu_flags => sig_alu_flags, d_addr_out => sig_d_addr, ctrl => sig_ctrl);
+  map(led=>led, clk => clk, ctrl_btns => inversebtns, alu_flags => sig_alu_flags, d_addr_out => sig_d_addr, ctrl => sig_ctrl);
   dpu : data_path_unit port
   map
   (
