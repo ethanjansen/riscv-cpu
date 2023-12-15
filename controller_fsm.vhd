@@ -39,7 +39,6 @@ architecture fsm of controller_fsm is
   constant reset_state           : std_logic_vector(3 downto 0) := "0001";
   constant choose_state          : std_logic_vector(3 downto 0) := "0010";
   constant branch_pc_inc_state   : std_logic_vector(3 downto 0) := "0011";
-  constant branch_pmem_en_state  : std_logic_vector(3 downto 0) := "0100";
   constant reg_write_state       : std_logic_vector(3 downto 0) := "0101";
   constant extra_for_3step_state : std_logic_vector(3 downto 0) := "0110";
   constant reg_read_state        : std_logic_vector(3 downto 0) := "0111";
@@ -122,6 +121,7 @@ begin
         pmem_en <= '1';
       when reset_state =>
         pc_reset <= '1';
+        sstep_clear <= '1';
       when branch_pc_inc_state =>
         pc_br <= '1';
       when wait_state =>
