@@ -179,7 +179,22 @@ or 0 if the first imput is less-than/greater-than the second input.
 \color{red}{TBD}\color{black}
 
 \subsection{Control}
-\color{red}{TBD}\color{black}
+\color{red}{Incomplete...}\color{black}\\
+The control is primarily separate from the DPU (apart from a few components such as the ALU control).
+This nicely separates the control from the rest of the CPU processing and makes a nice division in the design.
+We were able to do this by not considering pipelining, thus removing any forwarding registers and branch prediction modules from being interweaved into the DPU.
+
+However, because there is no pipelining, the controller needs to be aware of how long each instruction takes to execute.
+This is mostly separated into the six different instruction types--where each instruciton within an instruction type takes the same number of clock cycles to execute.
+For the current implementations, the instruction length is hardcoded into the controller. For instance, the controller will wait four clock cycles for an ADD to execute
+before continuing to the next instruction.
+
+The controller also has support of pausing and single-stepping.
+This greatly improves the debugging of the device.
+This is useful not only during hardware design of the CPU but also when writing software to run on the CPU.
+Currently, however, there is no proper I/O support, so there are dedicated buttons on the FPGA board to control the single-stepping.
+Thus, single-stepping can not be controlled via a software debugger.
+This is planned for future work.
 
 \section{Testing \& Design Review}
 \color{red}{TBD}\color{black}
@@ -193,8 +208,46 @@ or 0 if the first imput is less-than/greater-than the second input.
 
 \section*{VHDL Implementations}
 Sample:
-\color{red}{TBD}\color{black}
+\color{red}{TBD due to current overfull issues...}\color{black}\\
 %\verbatiminput{../arithmetic_logic_unit.vhd}[breaklines] % this needs work
+\begin{Verbatim}[breaklines]
+    library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
+entity program_counter is
+  port
+  (
+    clk        : in std_logic; --! Clock
+    reset      : in std_logic; --! Reset to 0
+    en         : in std_logic; --! Enable
+    br         : in std_logic; --! Branch
+    jump_value : in std_logic_vector(11 downto 0);
+    count      : out std_logic_vector(10 downto 0)
+  );
+end program_counter;
+
+architecture counter_signed of program_counter is
+  signal count_buf : signed(11 downto 0);
+begin
+  process (clk)
+  begin
+    if rising_edge(clk) then
+      if reset = '1' then
+        count_buf <= to_signed(0, 12);
+      elsif br = '1' then
+        count_buf <= count_buf + signed(jump_value) - 1;
+      elsif en = '1' then
+        count_buf <= count_buf + 1;
+        if count_buf(11) = '1' then
+          count_buf <= to_signed(0, 12);
+        end if;
+      end if;
+    end if;
+  end process;
+  count <= std_logic_vector(unsigned(count_buf(10 downto 0)));
+end counter_signed;
+\end{Verbatim}
 }
 
 \nocite{*}
