@@ -117,16 +117,21 @@ Because of this the goal to implement $2^{32}$ deep memory blocks, however there
 
 \subsection{ALU}
 The arithmetic logic unit is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
-The main operations the ALU is required to support for RV32I are:
+Shown in Figure \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
+arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
+the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block.
+
+This ALU Control block takes in \verb|opcode, funct3|, and \verb|funct7| from the encoded instruction and translates this into the necessary 3-bit ALU control signal.
+Separating this block also allows more easily decoding the necessary information from the six different \cite{riscvunprovisioned} instruction types.
 \begin{figure}
     \label{table:ALUOps}
     \centering
-    \begin{tabular}{|c|c|}
-        \hline\\
+    \begin{tabular}{|p{2.7cm}|p{4cm}|}
+        \hline
         Operation & Instructions \\
-        \hline\hline\\
-        ADD & ADD(I),Load\&Store,JALR,AUIPC\\
-        SUB & SUB,SLT,Branch\\
+        \hline\hline
+        ADD & ADD(I),\newline Load \& Store (various),\newline JALR, AUIPC\\
+        SUB & SUB, SLT (various),\newline Branch (various)\\
         XOR & XOR(I)\\
         OR & OR(I)\\
         AND & AND(I)\\
