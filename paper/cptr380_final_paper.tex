@@ -58,9 +58,19 @@ RISC-V is not actually \textit{an} ISA but rather a collection of ISAs,
 ranging from 32-bit to 128-bit standards and supporting various levels of complexity by way of extensions to the base ISAs. 
 Some official extensions include the M extension which adds multiplication and division support, 
 the A extension which adds support for atomic instructions, and the F and D extensions which add support for single- and double-precision floating numbers, 
-respectively \cite{riscvunprovisioned}. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application. 
+respectively \cite{riscvunprovisioned}. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application.
 
+The RV32I ISA defines four main instruction types, with an additional two instruction types which are subsets of the main instruction types. They are as follows:
+\begin{itemize}
+  \item R-type: Supports integer register-register arithmetic operations
+  \item I-type: Supports integer register-immediate arithmetic operations
+  \item S-type: Supports store instructions
+  \item SB-type: Supports branch instructions
+  \item U-type: Supports load upper immediate (\verb|LUI|) and add upper immediate to \verb|pc| (\verb|AUIPC|) instructions
+  \item UJ-type: Supports jump and link (\verb|JAL|) instructions
 \section{Project Goals}
+
+
 In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
 RV32I is the RISC-V base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
 Using this, the implemented microcontroller should easily support C code cross-compilation via clang.
