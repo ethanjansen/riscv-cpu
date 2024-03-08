@@ -110,6 +110,12 @@ the switch to using a bank of registers is the most significant hardware design 
 This change, however, is in keeping with the RV32I standard and allows for more flexibility when programming the CPU.
 
 \subsection{Instruction \& Data Memory}
+\begin{figure}[!h]
+    \label{fig:instmemblock}
+    \centering
+    \includegraphics[width=5cm]{CPTR380_inst_mem.png}
+    \caption{Instruction Memory \& Program Counter with Preliminary Step \& Branch Support}
+\end{figure}
 Each memory (instruciton and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \color{red}needs citation\color{black}.
 This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
 --the clock will not have to be further delayed as it may have been otherwise.
@@ -123,17 +129,31 @@ As of now the instruction and data memory depth is not defined, however RV32I su
 Because of this the goal to implement $2^{32}$ deep memory blocks, however there may be some currently unkown limitation of the FPGAs used for testing.
 
 \subsection{Register File}
-\color{red}{TBD}\color{black}
+\begin{figure}[!h]
+    \label{fig:regblock}
+    \centering
+    \includegraphics[width=5cm]{CPTR380_registers.png}
+    \caption{32-bit Register File}
+\end{figure}
+\color{red}{Incomplete..}\color{black}\\
+Similar to the Data Memory implementation, the register block supports writing byte and half-words in addition to full words.
+\textbf{Note:} this might be changed as when a register is written to the full register is overwritten regardless, even when only writing bytes and half-words.
 
 \subsection{ALU}
+\begin{figure}[!h]
+    \label{fig:alublock}
+    \centering
+    \includegraphics[width=5cm]{CPTR380_ALU.png}
+    \caption{ALU with ALU Control and Conrol Flag Output}
+\end{figure}
 The arithmetic logic unit is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
-Shown in Figure \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
+Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
 the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block.
 
 This ALU Control block takes in \verb|opcode, funct3|, and \verb|funct7| from the encoded instruction and translates this into the necessary 3-bit ALU control signal.
 Separating this block also allows more easily decoding the necessary information from the six different \cite{riscvunprovisioned} instruction types.
-\begin{figure}
+\begin{table}
     \label{table:ALUOps}
     \centering
     \begin{tabular}{|p{2.7cm}|p{4cm}|}
@@ -150,8 +170,20 @@ Separating this block also allows more easily decoding the necessary information
         Right Shift (Arith.) & SRA(I)\\
         \hline
     \end{tabular}
+    % there seems to be a caption spacing issue. probably related to IEEE, may just end up using figure
     \caption{RV32I Base Arithmetic Operations Matched to the Instructions}
-\end{figure}
+\end{table}
+
+The ALU also outputs flags indicating if the result is less than or greater than zero.
+With these two flag outputs any of the branch conditions can be supported:
+\begin{itemize}
+    \item BEQ: equals
+    \item BNE: not equals
+    \item BLT \& BLTU: less-than
+    \item BGE \& BGEU: greater-than
+\end{itemize}
+Furthermore, the $r<0$ flag is also zero-extended and output (via a mux) in order to support the SLT \& SLTI (set less-than) instructions--which set a register to 1
+or 0 if the first imput is less-than/greater-than the second input.
 
 \subsection{DPU Miscellaneous}
 \color{red}{TBD}\color{black}
