@@ -7,11 +7,13 @@
 \usepackage{stfloats}
 \usepackage{url}
 \usepackage{verbatim}
+\usepackage{fancyvrb,fvextra}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \usepackage{balance}
+\usepackage[square, numbers]{natbib}
 \begin{document}
 \title{CPTR380 RISC-V RV32I FPGA Implementation}
 \author{Jaron Brown \& Ethan Jansen
@@ -29,16 +31,17 @@ ISA, RISC, RISC-V, RV32I FPGA, VHDL.
 
 
 \section{Introduction}
-\IEEEPARstart{S}{ince} designing a custom ALU-based CPU last quarter in the Intro to Digital Design class, 
+\IEEEPARstart{S}{ince} designing a custom ALU-based CPU last quarter for the Intro to Digital Design class, 
 both of the authors developed an interest in implementing a more commonly supported instruction set architecture (ISA). 
 When presented with the opportunity to pursue a project related to computer architecture in their Computer Architecture class, 
 both authors jumped at the opportunity to implement another CPU design. They initially considered implementing the MIPS ISA but, 
 after conducting more research, decided on implementing one of the RISC-V standard ISAs, RV32I. This decision was made based on the abundant 
-documentation for the RISC-V ISAs, RV32I's relative simplicity, and the high commercial interest in these ISA specifications.
+documentation for the RISC-V ISAs, RV32I's relative simplicity, the high commercial interest in these ISA specifications,
+and the interest in supporting open-source projects.
 
 One of the dominant reasons many companies are developing RISC-V implementations is it open-source nature. 
 The dominant ISAs (x86, ARM, MIPS, etc.) all have steep licensing fees. The RISC-V ISAs, in comparison, are completely free. 
-Additionally, the closed-source nature of the dominant ISAs limits the freedom those designing implementation of these ISAs. 
+Additionally, the closed-source nature of the dominant ISAs limit the freedom those designing implementation of these ISAs. 
 Having a completely open-source ISA just makes sense--it lowers the barrier to entry for designing hardware to implement standard 
 ISAs and allows for more innovation in the realm of CPU design.  
 
@@ -51,37 +54,116 @@ This means more individual instructions will be required to complete a given tas
 hardware implementation to be much simpler than that for CISC ISAs. In fact, implementations of x86-64, the most widely adopted CISC ISA, 
 breaks its CISC instructions into "microinstructions" which are easier to implement in hardware, similar to RISC ISAs.
 
-There has been reference to RISC-V ISAs. The reason for the plural ISAs is RISC-V is actually a collection of ISAs, 
+RISC-V is not actually \textit{an} ISA but rather a collection of ISAs, 
 ranging from 32-bit to 128-bit standards and supporting various levels of complexity by way of extensions to the base ISAs. 
 Some official extensions include the M extension which adds multiplication and division support, 
 the A extension which adds support for atomic instructions, and the F and D extensions which add support for single- and double-precision floating numbers, 
-respectively. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application. 
+respectively \cite{riscvunprovisioned}. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application. 
 
 \section{Project Goals}
-In this project, version 2.1 of the RV32I ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
-RV32I is the RISC-V base integer ISA and implements the core functionality of the RISC-V architecture family. 
-Although RV32 supports pipelining, this projects implemetation will not implement this feature due to time constrains. 
-I/O, multiplication and division, full support for C code compilation, and pipelining, are stretch goals of this project. 
-The authors hope to continue this project beyond their class and continue to refine the design and add more features.
+In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
+RV32I is the RISC-V base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
+Using this, the implemented microcontroller should easily support C code cross-compilation via clang.
+This will help test/debug the microcontroller during implementation.
+Even more notable, however, is this will greatly improve the accessibility of this project as a useful processor.
+
+\subsection{Stretch Goals}
+The following goals would all improve the design, however are not necessary to meet a basic RV32I implementation.
+Because of time constraints these are items are not actively being pursued.
+\begin{itemize}
+    \item I/O: I/O support is not part of RV32I. For this reasoning an extension, or a co-processor, would be needed for proper implementation.
+        For these reasons, proper I/O implementation is a stretch goal. However, because basic I/O support is required for testing/debugging, it will be unofficially
+        implemented for these reasons.
+    \item Pipelining: Although RV32 supports pipelining, this project's implemetation will not implement this feature due to projected time constraints.
+        Pipelining is not necessary to meet ISA requirements, and the lack of pipelining will only increase the clock cycles per instruction (CPI) but will greatly
+        simplify the control logic and data path unit (DPU).
+    \item Multiplication \& Division: These are technically part of the M extension \cite{riscvunprovisioned} and thus are not high priorities.
+        However, because \verb|IEEE.numeric_std| (the VHDL library) has built in support for multiplication and division this would not be difficult to add to
+        the existing arithment logic unit (ALU). The ALU would simply require another bit of control.
+    \item Standard C Code Compilation Support: Basic C support is planned for this project, however exensive support is currently not guarnateed.
+\end{itemize}
+The authors intend to continue supporting this project by refining the design and implemented the discussed stretch goals.
  
-\section{Implementation Overview}
+\section{Implementation}
+\subsection{Overview}
 This project's implementation of non-pipelined RV32I consists of a few core components:
 \begin{itemize}
-    \item instruction memory
-    \item data memory
-    \item a register block
-    \item an ALU (Arithmetic Logic Unit)
+    \item instruction \& data memory (separated)
+    \item a register file
+    \item an ALU
+    \item various other DPU components related to sign-extension, incrementing the program counter, branching, and routing signals
     \item a control module
-    \item various other components related to sign-extension, incrementing the program counter, and routing signals. 
 \end{itemize}
-Unlike the author's previous CPU designs which used an accumulator, this implementation uses a register block with 32 32-bit wide registers.
-This is in keeping with the RV32I standard and allows for more flexibility when programming the CPU.
-Even though the entirety of the RV32I ISA will be handled, not all of the instructions will be implemented.
-The handled, but not implemented, instructions are as follows: FENCE, FENCE.I, ECALL, EBREAK, CSRRW, CSRRS, CSRRC, CSRRWI, CSRRSI, and CSRRCI.
-These functions are unnecessary for this project's implemetation as they pertain to system calls, pipelining, and control and status.
+Unlike the authors' previous CPU designs which used an accumulator-based design, this implementation uses a register file with 32 32-bit wide registers.
+Besides the different ISA support (the original accumulator-based CPU used a custom ISA),
+the switch to using a bank of registers is the most significant hardware design change between the two implementations.
+This change, however, is in keeping with the RV32I standard and allows for more flexibility when programming the CPU.
+
+\subsection{Instruction \& Data Memory}
+Each memory (instruciton and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \color{red}needs citation\color{black}.
+This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
+--the clock will not have to be further delayed as it may have been otherwise.
+
+One change from AMD's example that needed to be made was support writing bytes and half-words for data memory.
+This is to support the \verb|sb| and \verb|sh| instructions as they do not overwrite the upper bits.
+Without the additional support baked into the data memory,
+an additional register would need to be added to temporarily hold the upper bits so that they do not get overwritten--this would require additional clock cycles to implement.
+
+As of now the instruction and data memory depth is not defined, however RV32I supports 32-bit addresses.
+Because of this the goal to implement $2^{32}$ deep memory blocks, however there may be some currently unkown limitation of the FPGAs used for testing.
+
+\subsection{Register File}
+\color{red}{TBD}\color{black}
+
+\subsection{ALU}
+The arithmetic logic unit is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
+Shown in Figure \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
+arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
+the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block.
+
+This ALU Control block takes in \verb|opcode, funct3|, and \verb|funct7| from the encoded instruction and translates this into the necessary 3-bit ALU control signal.
+Separating this block also allows more easily decoding the necessary information from the six different \cite{riscvunprovisioned} instruction types.
+\begin{figure}
+    \label{table:ALUOps}
+    \centering
+    \begin{tabular}{|p{2.7cm}|p{4cm}|}
+        \hline
+        Operation & Instructions \\
+        \hline\hline
+        ADD & ADD(I),\newline Load \& Store (various),\newline JALR, AUIPC\\
+        SUB & SUB, SLT (various),\newline Branch (various)\\
+        XOR & XOR(I)\\
+        OR & OR(I)\\
+        AND & AND(I)\\
+        Left Shift & SLL(I)\\
+        Right Shift & SRL(I)\\
+        Right Shift (Arith.) & SRA(I)\\
+        \hline
+    \end{tabular}
+    \caption{RV32I Base Arithmetic Operations Matched to the Instructions}
+\end{figure}
+
+\subsection{DPU Miscellaneous}
+\color{red}{TBD}\color{black}
+
+\subsection{Control}
+\color{red}{TBD}\color{black}
+
+\section{Testing \& Design Review}
+\color{red}{TBD}\color{black}
 
 \section{Conclusion}
-\color{red}{TBD}
+\color{red}{TBD}\color{black}
+
+{\appendices
+\section*{Complete CPU Block Diagrams}
+\color{red}{TBD}\color{black}
+
+\section*{VHDL Implementations}
+Sample:
+\color{red}{TBD}\color{black}
+%\verbatiminput{../arithmetic_logic_unit.vhd}[breaklines] % this needs work
+}
 
 \nocite{*}
 \bibliographystyle{IEEEtran}\bibliography{IEEEabrv,bibliography}
