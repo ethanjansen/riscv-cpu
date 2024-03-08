@@ -74,8 +74,11 @@ This project's implementation of non-pipelined RV32I consists of a few core comp
     \item a control module
     \item various other components related to sign-extension, incrementing the program counter, and routing signals. 
 \end{itemize}
-Unlike the author's previous CPU designs which used and accumulator, this implementation uses a register block with 32 32-bit wide registers.
+Unlike the author's previous CPU designs which used an accumulator, this implementation uses a register block with 32 32-bit wide registers.
 This is in keeping with the RV32I standard and allows for more flexibility when programming the CPU.
+Even though the entirety of the RV32I ISA will be handled, not all of the instructions will be implemented.
+The handled, but not implemented, instructions are as follows: FENCE, FENCE.I, ECALL, EBREAK, CSRRW, CSRRS, CSRRC, CSRRWI, CSRRSI, and CSRRCI.
+These functions are unnecessary for this project's implemetation as they pertain to system calls, pipelining, and control and status.
 
 \section{Conclusion}
 \color{red}{TBD}
