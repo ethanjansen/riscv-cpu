@@ -192,7 +192,13 @@ or 0 if the first imput is less-than/greater-than the second input.
 \color{red}{TBD}\color{black}
 
 \section{Testing \& Design Review}
-\color{red}{TBD}\color{black}
+To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
+This can be done one of two ways: implementing testbenches in either VHDL or Python using cocotb or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
+Implementing testbenches is the ideal method of testing modules.
+Both the authors have experience using testing wrappers and reading the test results using the FPGA board.
+They hope to use the built-in testbench implementation build into Xilinx ISE, which is the program the authors use for synthesis and configuration of the the FPGA.
+They did consider using cocotb, which is a HDL testbench written in Python.
+However, cocotb was found to be difficult to configure and may be considered later on.
 
 \section{Conclusion}
 \color{red}{TBD}\color{black}
