@@ -1,11 +1,83 @@
+--! ### RISC-V RV32I Base Instruction Formats:
+--! ##### R-Type:
 --! {reg: [
---!   {"bits": 10, "name": "Data", "attr": ["address", "immediate", "offset"]},
---!   {"bits": 1, "name": "Immediate"},
---!   {"bits": 2, "name": "general"},
---!   {"bits": 3, "name": "Function", "attr": ["load", "add", "shift left", "shift right", "and", "or", "xor", "branch", "wait", "seven-segment", "led"]},
---!   {"bits": 2, "name": "Operation", "attr": ["ALU", "store", "PC", "Display"] }
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "rd"},
+--!   {"bits": 3, "name": "funct3"},
+--!   {"bits": 5, "name": "rs1"},
+--!   {"bits": 5, "name": "rs2"},
+--!   {"bits": 7, "name": "funct7"}
 --! ]}
-
+--! ##### I-Type:
+--! {reg: [
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "rd"},
+--!   {"bits": 3, "name": "funct3"},
+--!   {"bits": 5, "name": "rs1"},
+--!   {"bits": 12, "name": "imm[11:0]"}
+--! ]}
+--! ##### S-Type:
+--! {reg: [
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "imm[4:0]"},
+--!   {"bits": 3, "name": "funct3"},
+--!   {"bits": 5, "name": "rs1"},
+--!   {"bits": 5, "name": "rs2"},
+--!   {"bits": 7, "name": "imm[11:5]"}
+--! ]}
+--! ##### U-Type:
+--! {reg: [
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "rd"},
+--!   {"bits": 20, "name": "imm[31:12]"}
+--! ]}
+--! #### Base Instruction Variants:
+--! ##### B-Type:
+--! Variant of S-type used to encode branch offsets in multiples of 2. The middle bits (imm[10:1]) are fixed compared to S-type but the lowest bit in S format (inst[7]) encodes a high-order bit in B format.
+--! {reg: [
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "imm[4:1], imm[11]"},
+--!   {"bits": 3, "name": "funct3"},
+--!   {"bits": 5, "name": "rs1"},
+--!   {"bits": 5, "name": "rs2"},
+--!   {"bits": 7, "name": "imm[12], imm[10:5]"}
+--! ]}
+--! ##### J-Type:
+--! Variant of J-type used to encode J-immediates
+--! {reg: [
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "rd"},
+--!   {"bits": 20, "name": "imm[20], imm[10:1], imm[11], imm[19:12]"}
+--! ]}
+--! #### Instruction Encoding Variants:
+--! Labeled to show which instruction bit (inst[y]) produces the bit of the immediate.
+--! ##### I-immediate:
+--! {reg: [
+--!   {"bits": 11, "name": "inst[30:25], inst[24:21], inst[20]"},
+--!   {"bits": 31, "name": "-- inst[31] --"}
+--! ]}
+--! ##### S-immediate:
+--! {reg: [
+--!   {"bits": 11, "name": "inst[30:25], inst[11:8], inst[7]"},
+--!   {"bits": 31, "name": "-- inst[31] --"}
+--! ]}
+--! ##### B-immediate:
+--! {reg: [
+--!   {"bits": 1, "name": "0"},
+--!   {"bits": 11, "name": "inst[7], inst[30:25], inst[11:8]"},
+--!   {"bits": 30, "name": "-- inst[31] --"}
+--! ]}
+--! ##### U-immediate:
+--! {reg: [
+--!   {"bits": 12, "name": "-- 0 --"},
+--!   {"bits": 20, "name": "inst[31], inst[30:20], inst[19:12]"}
+--! ]}
+--! ##### J-immediate:
+--! {reg: [
+--!   {"bits": 1, "name": "0"},
+--!   {"bits": 19, "name": "inst[19:12], inst[20], inst[30:25], inst[24:21]"},
+--!   {"bits": 12, "name": "-- inst[31] --"}
+--! ]}
 -------------------------------------------------------------------------------
 -- Company:        Walla Walla University
 -- Engineer:       Ethan Jansen
