@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   19:32:01 03/10/2024
+-- Create Date:   00:42:22 03/14/2024
 -- Design Name:   
--- Module Name:   /home/wwu/1458226/Documents/CPTR380/RISC_V/ALU_test.vhd
+-- Module Name:   /home/wwu/1458226/Documents/CPTR380/RISC_V/ALU_testbench.vhd
 -- Project Name:  RISC_V
 -- Target Device:  
 -- Tool versions:  
@@ -32,10 +32,10 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY ALU_test IS
-END ALU_test;
+ENTITY ALU_testbench IS
+END ALU_testbench;
  
-ARCHITECTURE behavior OF ALU_test IS 
+ARCHITECTURE behavior OF ALU_testbench IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
@@ -45,8 +45,7 @@ ARCHITECTURE behavior OF ALU_test IS
          data1_in : IN  std_logic_vector(31 downto 0);
          data2_in : IN  std_logic_vector(31 downto 0);
          data_out : OUT  std_logic_vector(31 downto 0);
-         less : OUT  std_logic;
-         greater : OUT  std_logic
+         flags : OUT  std_logic_vector(3 downto 0)
         );
     END COMPONENT;
     
@@ -58,12 +57,7 @@ ARCHITECTURE behavior OF ALU_test IS
 
  	--Outputs
    signal data_out : std_logic_vector(31 downto 0);
-   signal less : std_logic;
-   signal greater : std_logic;
-   -- No clocks detected in port list. Replace <clock> below with 
-   -- appropriate port name 
- 
-   --constant <clock>_period : time := 10 ns;
+   signal flags : std_logic_vector(3 downto 0);   
  
 BEGIN
  
@@ -73,18 +67,8 @@ BEGIN
           data1_in => data1_in,
           data2_in => data2_in,
           data_out => data_out,
-          less => less,
-          greater => greater
+          flags => flags
         );
-
-   -- Clock process definitions
-   --<clock>_process :process
-   --begin
-	--	<clock> <= '0';
-	--	wait for <clock>_period/2;
-	--	<clock> <= '1';
-	--	wait for <clock>_period/2;
-   --end process;
 
    -- Stimulus process
    stim_proc: process
@@ -92,9 +76,7 @@ BEGIN
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 
-      --wait for <clock>_period*10;
-
-      -- insert stimulus here 
+      -- insert stimulus here
 		
 		ctrl <= "000"; -- ADD
 		data1_in <= x"DEADBEEF";
@@ -152,6 +134,48 @@ BEGIN
 		assert (data_out = x"D0A0B0E0")
 		report "Test failed for AND" severity error;
 		
+		ctrl <= "000"; -- Test comparision 1
+		data1_in <= x"FFFFFFFF";
+		data2_in <= x"FFFFFFFF";
+		wait for 20 ns;
+		assert (flags = "0000")
+		report "Test failed for comparison 1" severity error;
+		
+		ctrl <= "001"; -- Test comparision 2
+		data1_in <= x"0FFFFFFF";
+		data2_in <= x"00FFFFFF";
+		wait for 20 ns;
+		assert (flags = "1010")
+		report "Test failed for comparison 2" severity error;
+		
+		ctrl <= "000"; -- Test comparision 3
+		data1_in <= x"FFFFFFFF";
+		data2_in <= x"00000001";
+		wait for 20 ns;
+		assert (flags = "0110")
+		report "Test failed for comparison 3" severity error;
+		
+		ctrl <= "010"; -- Test comparision 4
+		data1_in <= x"00000001";
+		data2_in <= x"FFFFFFF0";
+		wait for 20 ns;
+		assert (flags = "1001")
+		report "Test failed for comparison 4" severity error;
+		
+		ctrl <= "010"; -- Test comparision 5
+		data1_in <= x"FFFFFFFE";
+		data2_in <= x"FFFFFFFF";
+		wait for 20 ns;
+		assert (flags = "0101")
+		report "Test failed for comparison 5" severity error;
+		
+		ctrl <= "010"; -- Test comparision 6
+		data1_in <= x"FFFFFFFE";
+		data2_in <= x"FFFFFFF0";
+		wait for 20 ns;
+		assert (flags = "1010")
+		report "Test failed for comparison 6" severity error;
+
       wait;
    end process;
 
