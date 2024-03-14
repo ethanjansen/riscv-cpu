@@ -38,7 +38,7 @@ architecture alu of arithmetic_logic_unit is
   constant sel_or                           : std_logic_vector(2 downto 0) := "110";
   constant sel_and                          : std_logic_vector(2 downto 0) := "111";
   signal nonzero                            : std_logic;
-  signal shift                              : std_logic_vector(5 downto 0);
+  signal shift                              : std_logic_vector(4 downto 0);
   signal sig_sra                            : std_logic_vector(31 downto 0);
   signal sig_xor, sig_srl, sig_or, sig_and  : std_logic_vector(31 downto 0);
   signal sig_sll                            : unsigned(31 downto 0);
@@ -48,7 +48,7 @@ begin
   -- signals all calculated to be muxed via ctrl
 
   -- logic
-  shift <= data2_in(5 downto 0);
+  shift <= data2_in(4 downto 0);
   sig_add <= signed(data1_in) + signed(data2_in);
   sig_sll <= shift_left(unsigned(data1_in), to_integer(unsigned(shift))); --! Check type of output
   sig_sub <= signed(data1_in) - signed(data2_in);
