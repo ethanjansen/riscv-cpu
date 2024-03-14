@@ -14,37 +14,31 @@
 -- Program Counter
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
 
 entity program_counter is
   port
   (
-    clk        : in std_logic; --! Clock
-    reset      : in std_logic; --! Reset to 0
-    en         : in std_logic; --! Enable
-    br         : in std_logic; --! Branch
-    jump_value : in std_logic_vector(11 downto 0); --! Jump by signed value for branch operations.
-    count      : out std_logic_vector(10 downto 0) --! Counter Value (11 bits)
+    clk   : in std_logic; --! Clock
+    reset : in std_logic; --! Reset to 0
+    en    : in std_logic; --! Enable
+    D     : in std_logic_vector(9 downto 0); --! New pc
+    Q     : out std_logic_vector(9 downto 0) --! Current pc
   );
 end program_counter;
 
-architecture counter_signed of program_counter is
-  signal count_buf : signed(11 downto 0); --! adding extra bit for signed addition
+architecture pc of program_counter is
 begin
   process (clk)
   begin
     if rising_edge(clk) then
       if reset = '1' then
-        count_buf <= to_signed(0, 12);
-      elsif br = '1' then
-        count_buf <= count_buf + signed(jump_value) - 1; -- Careful! Will allow overflow
+        Q <= "0000000000";
       elsif en = '1' then
-        count_buf <= count_buf + 1;
-        if count_buf(11) = '1' then -- reset to 0 after counting passed 2047
-          count_buf <= to_signed(0, 12);
-        end if;
+        Q <= D; --! When reset != 0 and en = 1
+      else
+        Q <= Q; --! When reset != 0 and en = 0
       end if;
     end if;
   end process;
-  count <= std_logic_vector(unsigned(count_buf(10 downto 0)));
-end counter_signed;
+
+end pc;

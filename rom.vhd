@@ -23,13 +23,13 @@ entity rom_with_init is
   (
     clk  : in std_logic; --! Clock
     en   : in std_logic; --! Enable
-    addr : in std_logic_vector(10 downto 0); --! Address
-    d    : out std_logic_vector(17 downto 0) --! Data Out
+    addr : in std_logic_vector(9 downto 0); --! Address
+    d    : out std_logic_vector(31 downto 0) --! Data Out
   );
 end rom_with_init;
 
 architecture rom of rom_with_init is
-  type rom_type is array(0 to 2047) of std_logic_vector(17 downto 0);
+  type rom_type is array(0 to 1023) of std_logic_vector(31 downto 0);
 
   impure function initRomFromFile(romFileName : in string) return rom_type is
     file romFile                                : text is in romFileName;
