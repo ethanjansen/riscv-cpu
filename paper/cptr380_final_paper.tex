@@ -61,18 +61,6 @@ Some official extensions include the M extension which adds multiplication and d
 the A extension which adds support for atomic instructions, and the F and D extensions which add support for single- and double-precision floating numbers, 
 respectively \cite{riscvunprovisioned}. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application.
 
-The RV32I ISA defines four main instruction types, with an additional two instruction types which are subsets of the main instruction types \cite{riscvunprovisioned}.
-They are as follows:
-\begin{itemize}
-  \item R-type: Supports integer register-register arithmetic operations
-  \item I-type: Supports integer register-immediate arithmetic operations
-  \item S-type: Supports store instructions
-  \item B-type (SB-type): Supports branch instructions
-  \item U-type: Supports load upper immediate (\verb|LUI|) and add upper immediate to \verb|pc| (\verb|AUIPC|) instructions
-  \item J-type (UJ-type): Supports jump and link (\verb|JAL|) instructions
-\end{itemize}
-
-
 In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
 RV32I is the RISC-V 32-bit base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
 Using this, the implemented microcontroller should easily support C code cross-compilation via clang after future I/O library support.
@@ -96,6 +84,94 @@ Because of time constraints these are items are not actively being pursued.
 \end{itemize}
 The authors intend to continue supporting this project by refining the design and implemented the discussed stretch goals.
  
+\section{Understanding RV32I}
+The RV32I ISA defines four main instruction types, with an additional two instruction types which are subsets of the main instruction types \cite{riscvunprovisioned}.
+They are as follows:
+\begin{itemize}
+  \item R-type: Supports integer register-register arithmetic operations
+  \item I-type: Supports integer register-immediate arithmetic operations
+  \item S-type: Supports store instructions
+  \item B-type (SB-type): Supports branch instructions
+  \item U-type: Supports load upper immediate (\verb|LUI|) and add upper immediate to \verb|pc| (\verb|AUIPC|) instructions
+  \item J-type (UJ-type): Supports jump and link (\verb|JAL|) instructions
+\end{itemize}
+While there are various types, they are structured in a way as to maintain as much consistency as possible.
+For instance, the opcode, destination register, and source registers are always located in the same part of the binary-coded instruction.
+Futhermore, the immediates are positioned as to keep the sign-extension bit in bit 31 of the instruction, and to keep the other bits of the immediates as consistent as possible.
+This sometimes requires unscrambling the B-type and J-type immediates--as indicated by the blocks in Figure 5--however eliminates unnecessary fan-out \cite{riscvunprovisioned} and simplifies the overall implementation.
+
+The RV32I ISA also specifies 40 instructions.
+They are as follows:
+\begin{itemize}
+  \item Register-Immediate:
+  \begin{itemize}
+    \item I-type: \verb|ADDI, SLTI[U], ANDI, ORI, XORI|
+    \item Special Shift I-type: \verb|SLLI, SRLI, SRAI|
+    \item U-type: \verb|LUI, AUIPC|
+  \end{itemize}
+  \item Register-Register:
+  \begin{itemize}
+    \item R-type: \verb|ADD, SLT[U], AND, OR, XOR, SLL,|
+     \verb|SRL, SUB, SRA|
+  \end{itemize}
+  \item Unconditional Jumps:
+  \begin{itemize}
+    \item J-type: \verb|JAL|
+    \item I-type: \verb|JALR|
+  \end{itemize}
+  \item Conditional Branches:
+  \begin{itemize}
+    \item B-type: \verb|BEQ, BNE, BLT[U], BGE[U]|
+  \end{itemize}
+  \item Load \& Store:
+  \begin{itemize}
+    \item I-type: \verb|LW, LH[U], LB[U]|
+    \item S-type: \verb|SW, SH, SB|
+  \end{itemize}
+  \item Memory Ordering:
+  \begin{itemize}
+    \item \verb|FENCE|
+  \end{itemize}
+  \item Environment Call \& Breakpoints:
+  \begin{itemize}
+    \item I-type: \verb|ECALL, EBREAK|
+  \end{itemize}
+\end{itemize}
+
+Most of the Register-Immediate and Register-Register are the usual arithmetic operations with are performed primarily by the ALU.
+There are a few exceptions, however, \verb|SLTI| and \verb|SLTIU| perform the same operation--setting the destiation register equal to one if the first source is less than the second--the difference is that one performs signed comparison while the other performs unsigned comparison.
+This requires supporting signed and unsigned comparison flag outputs from the ALU.
+The other exceptions are the U-type \verb|LUI| and \verb|AUIPC|.
+The \verb|LUI| instruction loads a 20-bit immediate into the upper bits of the destination register and thus does not require the ALU, only some zero-padding to 32 bits.
+The \verb|AUIPC| instruction allows creating program counter (PC) relative addresses and thus requires a byte-addressed PC input into the ALU.
+None of these instructions raise exceptions.
+
+The unconditional jump instructions are as one would expect, however the \verb|JAL| instruction notably uses a J-type immediate in order to encode more bits, thus requiring some unscrambling.
+Both of these instructions allow for modifying to PC in order to jump. While \verb|JAL| uses a PC relative offset, \verb|JALR| uses an offset relative to a base register.
+These instructions can also raise an \verb|Instruction-address-misaligned| exception if the target address is not aligned to a word (4 byte) boundary.
+This indicates the need for some basic exception handling.
+A proposed solution for this preliminary design is to store the exceptions as flags in some "exception-flags" control register.
+
+The conditional branches are similar to the unconditional jumps, but this time implemented as B-type instructions in order to perform register comparison.
+The ALU will handle this comparison via signed and unsigned subtraction and then output the necessary flags.
+If the appropriate ALU flags are raised the control will signal for the PC to take on a value corresponding to the B-type immediate (which requires unscrambling) offset.
+These instructions may also raise an \verb|Instruction-address-misaligned| exception.
+
+The load and store instructions are encoded using I- and S-type instructions, respectively.
+The difference in instruction types come from store needing two source registers--one for a base adress and one to store into--while the load instructions only require one register--for the base address.
+The instructions also support loading/storing bytes and half-words.
+While loading bytes (\verb|LB[U]|) and half-words (\verb|LH[U]|) is relatively straightforward--the upper bits can simply be masked off or signed extended as necessary--storing bytes (\verb|SB|) and half-words (\verb|SH|) is more complicated as the upper bits are not replaced on a store.
+Futhermore, when performing byte and half-word operations the addresses are aligned according to the byte or half-word, rather than keeping the address word-aligned.
+This requires some extra control and alignment checks as well as some built-in byte/half-word support for the Data Memory and I/O (as it will be treated as data memory) as shown in Figure 2.
+These instructions will also raise \verb|Address-misaligned| or \verb|Access-fault| exceptions if the address is not naturally aligned or if out of range.
+
+The additional memory ordering, environment call, and breakpoint instructions are less relevant to this preliminary design.
+There purpose is to support reading/writing to memory from different coprocessors, as well as to support some priveleged operating system and debugger functions.
+Because this does not yet apply to this project, the predecessor/successor I/O and read/write bits of the \verb|FENCE| instruction are simply saved to a control register as shown in figure 5 \cite{riscvunprovisioned}.
+Futhermore, the \verb|ECALL| instruction is treated as a \verb|NOP| while the \verb|EBREAK| instruction is treated as a \verb|HALT| for some possible future hardware-controlled halt and single-step (where CPU operation automatically halts between instructions or between pipeline stages) support.
+
+The deep understanding of these instructions is pivotal to this project and drives the data path unit (DPU) and controller implementations.
+
 \section{Implementation}
 \subsection{Overview}
 This project's implementation of non-pipelined RV32I consists of a few core components:
@@ -173,7 +249,7 @@ Tests include reading and writing to registers, reading and writing to register 
     \caption{ALU with Conrol Flag Output}
 \end{figure}
 The arithmetic logic unit (ALU) is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
-Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
+Shown in Table I are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
 the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block rather than directly from the instruction.
 In addition to arithmetic operations, the ALU performs comparisons between the two inputs, which are used for branch conditions and for the SLTI and SLTIU instructions.
@@ -213,6 +289,7 @@ Separating this block also allows more easily decoding the necessary information
         \hline
     \end{tabular}
     % there seems to be a caption spacing issue. probably related to IEEE, may just end up using figure
+    \vspace{4pt}
     \caption{RV32I Base Arithmetic Operations Matched to the Instructions}
 \end{table}
 

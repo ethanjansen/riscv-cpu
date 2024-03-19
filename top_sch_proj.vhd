@@ -49,6 +49,22 @@
 --!   {"bits": 5, "name": "rd"},
 --!   {"bits": 20, "name": "imm[20], imm[10:1], imm[11], imm[19:12]"}
 --! ]}
+--! ##### FENCE:
+--! {reg: [
+--!   {"bits": 7, "name": "opcode"},
+--!   {"bits": 5, "name": "rd"},
+--!   {"bits": 3, "name": "funct3"},
+--!   {"bits": 5, "name": "rs1"},
+--!   {"bits": 1, "name": "SW"},
+--!   {"bits": 1, "name": "SR"},
+--!   {"bits": 1, "name": "SO"},
+--!   {"bits": 1, "name": "SI"},
+--!   {"bits": 1, "name": "PW"},
+--!   {"bits": 1, "name": "PR"},
+--!   {"bits": 1, "name": "PO"},
+--!   {"bits": 1, "name": "PI"},
+--!   {"bits": 4, "name": "fm"}
+--! ]}
 --! #### Instruction Encoding Variants:
 --! Labeled to show which instruction bit (inst[y]) produces the bit of the immediate.
 --! ##### I-immediate:
