@@ -375,7 +375,7 @@ But implementing the ability to single-step through instructions/pipeline stages
 To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
 This could be done one of two ways: implement testbenches in either VHDL using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
 In their previous designs, the authors solely tested their designs using testing wrappers and running the tests on hardware.
-This method of testing took copious amounts of time (partially realted to ISE's long synthesis times) and was tedious.
+This method of testing took copious amounts of time (partially related to ISE's long synthesis times) and was tedious.
 Some tests need to be done on hardware either using wrappers or by testing a fully functioning design.
 For any testing that does not have to be done on hardware, testbenches are definitely the prefered way to test since they cut out some of the opportunity for error that comes from setting switches and reading LEDs.
 Additionally, they allow for automated pass/fail tests and provide timing diagrams, which simplify debugging significantly compared to testing on hardware.
@@ -384,7 +384,12 @@ Additionally, the ISE testbench tools provide timing diagrams for the tests, whi
 Since both authors are already familiar with Xilinx ISE for its synthesis and FPGA configuration tools, they opted to use the ISE testbench tools.
 The ISE VHDL testbenches were fairly simple to learn and using them for component testing saved the authors a significant amount of time.
 
-Because the project was not completed, there has been no design review.
+Given that the project was not completed, as desired, not everything can be reviewed.
+However, the components that were implemented in VHDL (given in the appendix) were tested thoroughly and found to be satisfactory.
+Futhermore, the entire DPU block diagram was completed to a satisfactory level.
+This specifically, allows for future work to be implemented more quickly--i.e. functioning as a design roadmap.
+As previously mentioned, it is unfortunate that the controller could not have been implemented in the time constraints as that would have provided more possibilities for applications and testing on the software-side of the project.
+That being said, this project is far enough along to be considered satisfactory of a Computer Architecture class project and as a preliminary RISC-V RV32I DPU.
 
 \section{Conclusion}
 This project has been an enjoyable learning experience for both the authors.
@@ -400,14 +405,6 @@ Both authors hope to continue this project and bring it to a functional state wh
 
 
 {\appendices
-\section*{Complete Data Path Unit Block Diagram}
-\begin{figure}[!h]
-  \label{fig:dpu}
-  \centering
-  \includegraphics[width=16cm, angle=270]{DPU.jpg}
-  \caption{Data Path Unity with Control Signals (blue)}
-\end{figure}
-
 \section*{VHDL Implementations}
 \subsection{Program Counter}
 \begin{Verbatim}[breaklines]
@@ -622,7 +619,13 @@ Both authors hope to continue this project and bring it to a functional state wh
     end process;
   end reg_blk;
 \end{Verbatim}
-}
+\section*{Complete Data Path Unit Block Diagram}
+\begin{figure}[!h]
+  \label{fig:dpu}
+  \centering
+  \includegraphics[width=16cm, angle=270]{DPU.jpg}
+  \caption{Data Path Unity with Control Signals (blue)}
+\end{figure}}
 
 \nocite{*}
 \bibliographystyle{IEEEtran}\bibliography{IEEEabrv,bibliography}
