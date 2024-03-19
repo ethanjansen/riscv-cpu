@@ -22,7 +22,12 @@
 \maketitle
 
 \begin{abstract}
-\color{red}{TBD}
+This project aimed to implement the RISC-V RV32I ISA specification in VHDL on a Xilinx Artix-7 FPGA.
+A high-level design of the data path unit was completed and most of its core features were implemented.
+The control logic, along with some aspects of the DPU still need to be completed.
+This project provided those involved with valuable knowledge about designing and implementing a register-based CPU.
+Additionally, it provided them with the opportunity to learn VHDL testbenches, which served as a great time-saver in their testing of the completed components.
+Although the authors were not able to accomplish their lofty project goals, they were able to create a solid foundation from which the project can be continued in the future--which both authors hope to do.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -173,7 +178,7 @@ Because this does not yet apply to this project, the predecessor/successor I/O a
 Futhermore, the \verb|ECALL| instruction is treated as a \verb|NOP| while the \verb|EBREAK| instruction is treated as a \verb|HALT| for some possible future hardware-controlled halt and single-step (where CPU operation automatically halts between instructions or between pipeline stages) support.
 
 The deep understanding of these instructions is pivotal to this project and drives the data path unit (DPU) and controller implementations.
-Currently, the controller design is left for future work, however, the complete DPU block diagram, as designed based on these RV32I instructions, is given in the appendix.
+Currently, the controller design is left for future work, however, the complete DPU block diagram, as designed based on these RV32I instructions, is given in the appendix as Figure 6.
 The design criteria for the individual DPU stages is described next.
 
 \section{Implementation}
@@ -340,8 +345,17 @@ This allows the modules to be simpler and makes the whole system more modular an
 The DPU fabric has not been implemented but the high-level design has been completed, as can be seen in Figure 6.
 
 \subsection{Control}
+The control logic, seen in disembodied form in Figure 6, is the "brains" of the CPU.
+It is what operates the DPU and flips all the muxes.
+The control logic takes a few inputs including large portions of the instructions, flags from the ALU, and exception flags.
+Using this data, it computes the control signals that manipulate the DPU modules and the DPU fabric to make to DPU function as one cohesive unit.
+The control logic is not implemented in VHDL but its control signals, as well as its input data, can be seen in Figure 6.
+The implementation of the control logic is effectively a complex finite state machine (FSM) that transitions to states based on inputs.
+These transitions or states (depending on if the FSM is a Mealy or a Moore machine) cause the control signals to change.
+Due to the complexity of the FSM required to control the DPU, implementing this control FSM will be challenging.
+
 The control is primarily separate from the DPU (apart from a few components such as the ALU control).
-This nicely separates the control from the rest of the CPU processing and makes a nice division in the design.
+This nicely separates the control from the rest of the CPU processing and makes a nice division in the design which makes it easier to understand and simpler to build.
 We were able to do this by not considering pipelining, thus removing any forwarding registers and branch prediction modules from being interweaved into the DPU.
 
 However, because there is no pipelining, the controller needs to be aware of how long each instruction takes to execute.
@@ -359,7 +373,7 @@ But implementing the ability to single-step through instructions/pipeline stages
 
 \section{Testing \& Design Review}
 To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
-This can be done one of two ways: implementing testbenches in either VHDL or Python using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
+This could be done one of two ways: implementing testbenches in either VHDL or Python using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
 Two compelling options for implementing testbenches are utelizing the VHDL testbench tools built into ISE or using cocotb.
 Testbenches are definitely the prefered way to test since they cut out some of the opportunity for error that comes from setting switches and reading LEDs.
 Additionally, they allow for automated pass/fail tests and provide timing diagrams, which simplify debugging significantly compared to testing on hardware.
@@ -371,7 +385,17 @@ Since both authors are already familiar with Xilinx ISE for its synthesis and FP
 The ISE VHDL testbenches were fairly simple to learn and using them for component testing saved the authors a significant amount of time.
 
 \section{Conclusion}
-\color{red}{TBD}\color{black}
+This project has been an enjoyable learning experience for both the authors.
+They did not accomplish their desired goals of having a fully working RV32I microprocessor, but were able to implement some core aspects of the RV32I specification.
+Such core components include the program counter, instruction memory, the register block, and the ALU.
+Even though the DPU is not fully implemented, most of the core components are implemented and the high-level design is complete.
+All that is left to complete the DPU is implement data memory with I/O virtual memory support, and the DPU fabric (which should be straightforward).
+After the DPU is complete, the only thing that remains is the control logic.
+This would take a significant amount of time but is achievable given the authors previous experience with their previous accumulator-based CPU design.
+The main limiting factor of this project was time.
+This project is quite substantial and, given the busy schedule of both of the authors, they were not able to spend the time required to bring this project to its functional milestone.
+Both authors hope to continue this project and bring it to a functional state when they have more time.
+
 
 {\appendices
 \section*{Complete Data Path Unit Block Diagram}
@@ -383,8 +407,6 @@ The ISE VHDL testbenches were fairly simple to learn and using them for componen
 \end{figure}
 
 \section*{VHDL Implementations}
-Sample:
-\color{red}{TBD due to current overfull issues...}\color{black}\\
 \subsection{Program Counter}
 \begin{Verbatim}[breaklines]
   library IEEE;
@@ -567,23 +589,30 @@ Sample:
       if rising_edge(clk) then
         if en = '1' then
           if we = '1' and A_Write /= "00000" then
-            REG(to_integer(unsigned(A_Write))) <= D;
+            REG(to_integer(
+              unsigned(A_Write))) <= D;
             if (A_Write = A_1) and (A_Write = A_2) then
               Q_1 <= D;
               Q_2 <= D;
             elsif (A_Write = A_1) then
               Q_1 <= D;
-              Q_2 <= REG(to_integer(unsigned(A_2)));
+              Q_2 <= REG(to_integer(
+                unsigned(A_2)));
             elsif (A_Write = A_2) then
               Q_2 <= D;
-              Q_1 <= REG(to_integer(unsigned(A_1)));
+              Q_1 <= REG(to_integer(
+                unsigned(A_1)));
             else
-              Q_1 <= REG(to_integer(unsigned(A_1)));
-              Q_2 <= REG(to_integer(unsigned(A_2)));
+              Q_1 <= REG(to_integer(
+                unsigned(A_1)));
+              Q_2 <= REG(to_integer(
+                unsigned(A_2)));
             end if;
           else
-            Q_1 <= REG(to_integer(unsigned(A_1)));
-                 Q_2 <= REG(to_integer(unsigned(A_2)));
+            Q_1 <= REG(to_integer(
+              unsigned(A_1)));
+                 Q_2 <= REG(to_integer(
+                  unsigned(A_2)));
           end if;
                   
         end if;
