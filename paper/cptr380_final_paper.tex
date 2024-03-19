@@ -119,6 +119,18 @@ This change, however, is in keeping with the RV32I standard and allows for more 
   \includegraphics[width=5cm]{PC.jpg}
   \caption{Program Counter with Branch \& Jump Support}
 \end{figure}
+The program counter (\verb|pc|), see Figure 1, was implemented in VHDL and meets most of RV32I's requirements.
+When implementing the program counter, a few liberties were taken with the RV32I specification.
+These include a ten-bit address and word-addressing.
+Although RV32I specifies 32-bit byte addresses for instructions, the current implementation utelizes word-addressed indexes 
+due to the data memory implementation and ten-bit addresses, also as a result of the data memory implementation.
+The instruction memory is built in a similar manner to an AMD-provided example.
+That example used word addressing so the implementation of data memory also uses word-addressing.
+The ten-bit address of the program counter matches the $2^{10}$ addresses in instruction memory.
+The \verb|enable| control signal for the program counter allows the current value to be locked.
+This is useful for this non-pipelined implementation where certain values need to be held constant through the clock cycles required to execute and instruction.
+The \verb|reset| signal allows for easy zeroing of the program counter. 
+
 
 \subsection{Instruction Memory,  Data Memory, and I/O}
 \begin{figure}[!h]
@@ -129,21 +141,30 @@ This change, however, is in keeping with the RV32I standard and allows for more 
     \includegraphics[width=5cm]{DMEM-IO.jpg}
     \caption{Instruction Memory (top). Data Memory with I/O Support (bottom).}
 \end{figure}
-Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|s \cite{amdblockram}.
+The instruction memory block, seen in the top of Figure 2, was implemented in VHDL using AMD's write-first memory example, which use an array of \verb|std_logic_vector|s \cite{amdblockram}.
 This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
 --the clock will not have to be further delayed as it may have been otherwise.
+The instruction memory has been implemented and holds a maximum of 1024 32-bit instructions, following AMD's example.
+Because the implementation does not support all of RV32I's 32-bit ($2^{32}$) addresses, the lower ten bits are masked and are used as the instruction memory address.
+The current implementation of instruction memory is untested.
+That being said, this implementation is very similar to the implementation used in the author's previous accumulator-based CPU design and was found to work in that context.
+This suggests the new adaptation should also function correctly.
+Still, hardware testing should be conducted.
 
+Currently, data memory, seen in the bottom of Figure 2, is not implemented due to time constraints.
+When implemented, data memory, similar to instruction memory, will hold 1024 32-bit wide values and will support read and write.
+As per RV32I specification, data memory will support storing/loading words, halfwords, and bytes.
 One change from AMD's example that needed to be made was support writing bytes and half-words for data memory.
 This is to support the \verb|sb| and \verb|sh| instructions as they do not overwrite the upper bits.
 Without the additional support baked into the data memory,
 an additional register would need to be added to temporarily hold the upper bits so that they do not get overwritten--this would require additional clock cycles to implement.
 
-The instruction memory has been implemented and holds a maximum of 1024 32-bit instructions.
-Because the implementation does not support all of RV32I's 32-bit ($2^{32}$) addresses, the lower ten bits are masked and are used as the instruction memory address.
-The current implementation of instruction memory is untested.
-Currently, data memory is not implemented due to time constraints.
-When implemented, data memory will hold 1024 32-bit wide values and will support read and write.
-As per RV32I specification, data memory will support storing/loading word, halfwords, and bytes.
+The current plan for I/O consists of adding virtual addresses to data memory that access I/O.
+Not all addresses in the I/O address space will support read and write.
+For example, the address associated with the switches will only support read and the address associated with the LEDs will only support write.
+This method of implementing I/O is the standard way I/O is implemented and this method is mentioned in the RV32I specification.
+Although the virtual memory I/O is not implemented in VHDL, a high-level design can be seen in lower half of Figure 2.
+
 \color{red}{Incomplete..}\color{black}\\
 \subsection{Register File}
 \begin{figure}[!h]
@@ -152,7 +173,7 @@ As per RV32I specification, data memory will support storing/loading word, halfw
     \includegraphics[width=5cm]{REG.jpg}
     \caption{32-bit Register File}
 \end{figure}
-The implementation of the register block fully supports the RV32I specification.
+The implementation of the register block, seen in Figure 3, fully supports the RV32I specification.
 Register \verb|x0| is writable but, when read, always returns a vector of zeros and the other generic registers (\verb|x1|-\verb|x31|) function according to the RV32I specification.
 The control signals to the register block are \verb|write-enable| and \verb|enable|.
 These control signals are important as they lock the register block so nothing changes (\verb|enable|) or, when \verb|enable| is held high, allow writes to the registers (\verb|write-enable|).
@@ -170,9 +191,9 @@ Tests include reading and writing to registers, reading and writing to register 
     \label{fig:alublock}
     \centering
     \includegraphics[width=5cm]{ALU.jpg}
-    \caption{ALU with Conrol Flag Output}
+    \caption{ALU with Control Flag Output}
 \end{figure}
-The arithmetic logic unit (ALU) is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
+The arithmetic logic unit (ALU), seen in Figure 4, is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
 Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
 the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block rather than directly from the instruction.
@@ -217,16 +238,24 @@ Separating this block also allows more easily decoding the necessary information
 \end{table}
 
 
-\subsection{DPU Miscellaneous}
+\subsection{DPU Fabric}
 \begin{figure}[!h]
   \label{fig:dpumisc}
   \centering
   \includegraphics[width=5cm]{Misc1.jpg}
   \rule{7cm}{0.8pt}
   \includegraphics[width=5cm]{Misc2.jpg}
-  \caption{Stuff}
+  \caption{DPU Fabric and Miscellaneous Control Registers}
 \end{figure}
-\color{red}{TBD}\color{black}
+With examples seen in Figure 5, the DPU fabric is what integrates the DPU modules (program counter, instruction memory, register block, ALU, and data memory) and allows them to function as one unit.
+DPU fabric functions include selecting from multiple inputs with multiplexors, sign-extension (either arithmetic or logical), instruction unscrambling, addition, and bit-shifting.
+Instruction unscrambling is vital for implementing support for J-type and B-type instructions due to their complex ordering of bits in the instruction.
+To make use of these instructions, those values must be unscrambled.
+The multiplexors are all controlled by the Control logic.
+Basically, whatever the modules are unable to do on their own, the DPU fabric fills in.
+This allows the modules to be simpler and makes the whole system more modular and easier to understand.
+
+The DPU fabric has not been implemented but the high-level design has been completed, as can be seen in Figure 6.
 
 \subsection{Control}
 \color{red}{Incomplete...}\color{black}\\
@@ -243,7 +272,7 @@ The controller also has support of pausing and single-stepping.
 This greatly improves the debugging of the device.
 This is useful not only during hardware design of the CPU but also when writing software to run on the CPU.
 Currently, however, there is no proper I/O support, so there are dedicated buttons on the FPGA board to control the single-stepping.
-Thus, single-stepping can not be controlled via a software debugger.
+Thus, single-stepping cannot be controlled via a software debugger.
 This is planned for future work.
 
 \section{Testing \& Design Review}
