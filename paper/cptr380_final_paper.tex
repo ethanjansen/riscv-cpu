@@ -61,13 +61,13 @@ Some official extensions include the M extension which adds multiplication and d
 the A extension which adds support for atomic instructions, and the F and D extensions which add support for single- and double-precision floating numbers, 
 respectively \cite{riscvunprovisioned}. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application.
 
-In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
+In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL intended for a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
 RV32I is the RISC-V 32-bit base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
 Using this, the implemented microcontroller should easily support C code cross-compilation via clang after future I/O library support.
 This will help test/debug the microcontroller during implementation.
 Even more notable, however, is this will greatly improve the accessibility of this project as a useful processor.
 
-\subsection{Stretch Goals}
+\section{Stretch Goals}
 The following goals would all improve the design, however are not necessary to meet a basic RV32I implementation.
 Because of time constraints these are items are not actively being pursued.
 \begin{itemize}
@@ -97,7 +97,7 @@ They are as follows:
   \item J-type (UJ-type): Supports jump and link (\verb|JAL|) instructions
 \end{itemize}
 
-While there are various types, they are structured in a way as to maintain as much consistency as possible.
+While there are various instruction types, they are structured in a way as to maintain as much consistency as possible.
 For instance, the opcode, destination register, and source registers are always located in the same part of the binary-coded instruction.
 Futhermore, the immediates are positioned as to keep the sign-extension bit in bit 31 of the instruction, and to keep the other bits of the immediates as consistent as possible.
 This sometimes requires unscrambling the B-type and J-type immediates--as indicated by the blocks in Figure 5--however eliminates unnecessary fan-out \cite{riscvunprovisioned} and simplifies the overall implementation.
@@ -140,8 +140,8 @@ They are as follows:
   \end{itemize}
 \end{itemize}
 
-Most of the Register-Immediate and Register-Register are the usual arithmetic operations with are performed primarily by the ALU.
-There are a few exceptions, however, \verb|SLTI| and \verb|SLTIU| perform the same operation--setting the destiation register equal to one if the first source is less than the second--the difference is that one performs signed comparison while the other performs unsigned comparison.
+Most of the Register-Immediate and Register-Register instructions correspond to the usual arithmetic operations which are performed primarily by the ALU.
+There are a few exceptions, however, \verb|SLTI| and \verb|SLTIU| perform the same operation--setting the destination register equal to one if the first source is less than the second--the difference is that one performs signed comparison while the other performs unsigned comparison.
 This requires supporting signed and unsigned comparison flag outputs from the ALU.
 The other exceptions are the U-type \verb|LUI| and \verb|AUIPC|.
 The \verb|LUI| instruction loads a 20-bit immediate into the upper bits of the destination register and thus does not require the ALU, only some zero-padding to 32 bits.
@@ -156,11 +156,11 @@ A proposed solution for this preliminary design is to store the exceptions as fl
 
 The conditional branches are similar to the unconditional jumps, but this time implemented as B-type instructions in order to perform register comparison.
 The ALU will handle this comparison via signed and unsigned subtraction and then output the necessary flags.
-If the appropriate ALU flags are raised the control will signal for the PC to take on a value corresponding to the B-type immediate (which requires unscrambling) offset.
+If the appropriate ALU flags are raised the controller will signal for the PC to take on a value corresponding to the B-type immediate (which requires unscrambling) offset.
 These instructions may also raise an \verb|Instruction-address-misaligned| exception.
 
 The load and store instructions are encoded using I- and S-type instructions, respectively.
-The difference in instruction types come from store needing two source registers--one for a base adress and one to store into--while the load instructions only require one register--for the base address.
+The difference in instruction types come from store needing two source registers, one for a base address and one to store into, while the load instructions only require one register, for the base address.
 The instructions also support loading/storing bytes and half-words.
 While loading bytes (\verb|LB[U]|) and half-words (\verb|LH[U]|) is relatively straightforward--the upper bits can simply be masked off or signed extended as necessary--storing bytes (\verb|SB|) and half-words (\verb|SH|) is more complicated as the upper bits are not replaced on a store.
 Futhermore, when performing byte and half-word operations the addresses are aligned according to the byte or half-word, rather than keeping the address word-aligned.
@@ -168,7 +168,7 @@ This requires some extra control and alignment checks as well as some built-in b
 These instructions will also raise \verb|Address-misaligned| or \verb|Access-fault| exceptions if the address is not naturally aligned or if out of range.
 
 The additional memory ordering, environment call, and breakpoint instructions are less relevant to this preliminary design.
-There purpose is to support reading/writing to memory from different coprocessors, as well as to support some priveleged operating system and debugger functions.
+Their purpose is to support reading/writing to memory from different coprocessors, as well as to support some priveleged operating system and debugger functions.
 Because this does not yet apply to this project, the predecessor/successor I/O and read/write bits of the \verb|FENCE| instruction are simply saved to a control register as shown in figure 5 \cite{riscvunprovisioned}.
 Futhermore, the \verb|ECALL| instruction is treated as a \verb|NOP| while the \verb|EBREAK| instruction is treated as a \verb|HALT| for some possible future hardware-controlled halt and single-step (where CPU operation automatically halts between instructions or between pipeline stages) support.
 
@@ -203,7 +203,7 @@ This change, however, is in keeping with the RV32I standard and allows for more 
 The program counter (\verb|pc|), see Figure 1, was implemented in VHDL and meets most of RV32I's requirements.
 When implementing the program counter, a few liberties were taken with the RV32I specification.
 These include a ten-bit address and word-addressing.
-Although RV32I specifies 32-bit byte addresses for instructions, the current implementation utelizes word-addressed indexes 
+Although RV32I specifies 32-bit byte addresses for instructions, the current implementation utilizes word-addressed indices 
 due to the data memory implementation and ten-bit addresses, also as a result of the data memory implementation.
 The instruction memory is built in a similar manner to an AMD-provided example.
 That example used word addressing so the implementation of data memory also uses word-addressing.
@@ -228,7 +228,7 @@ This allows for quick implementation; furthermore, it ensures that the memory bl
 The instruction memory has been implemented and holds a maximum of 1024 32-bit instructions, following AMD's example.
 Because the implementation does not support all of RV32I's 32-bit ($2^{32}$) addresses, the lower ten bits are masked and are used as the instruction memory address.
 The current implementation of instruction memory is untested.
-That being said, this implementation is very similar to the implementation used in the author's previous accumulator-based CPU design and was found to work in that context.
+That being said, this implementation is very similar to the implementation used in the authors' previous accumulator-based CPU design and was found to work in that context.
 This suggests the new adaptation should also function correctly.
 Still, hardware testing should be conducted.
 
@@ -236,17 +236,16 @@ Currently, data memory, seen in the bottom of Figure 2, is not implemented due t
 When implemented, data memory, similar to instruction memory, will hold 1024 32-bit wide values and will support read and write.
 As per RV32I specification, data memory will support storing/loading words, halfwords, and bytes.
 One change from AMD's example that needed to be made was support writing bytes and half-words for data memory.
-This is to support the \verb|sb| and \verb|sh| instructions as they do not overwrite the upper bits.
+This is to support the \verb|SB| and \verb|SH| instructions as they do not overwrite the upper bits.
 Without the additional support baked into the data memory,
 an additional register would need to be added to temporarily hold the upper bits so that they do not get overwritten--this would require additional clock cycles to implement.
 
 The current plan for I/O consists of adding virtual addresses to data memory that access I/O.
 Not all addresses in the I/O address space will support read and write.
 For example, the address associated with the switches will only support read and the address associated with the LEDs will only support write.
-This method of implementing I/O is the standard way I/O is implemented and this method is mentioned in the RV32I specification.
+This method of implementing I/O is a standard way I/O is implemented and this method is mentioned in the RV32I specification.
 Although the virtual memory I/O is not implemented in VHDL, a high-level design can be seen in lower half of Figure 2.
 
-\color{red}{Incomplete..}\color{black}\\
 \subsection{Register File}
 \begin{figure}[!h]
     \label{fig:regblock}
@@ -275,10 +274,10 @@ Tests include reading and writing to registers, reading and writing to register 
     \caption{ALU with Control Flag Output}
 \end{figure}
 The arithmetic logic unit (ALU), seen in Figure 4, is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
-Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
+Shown in Table I are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
 the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block rather than directly from the instruction.
-In addition to arithmetic operations, the ALU performs comparisons between the two inputs, which are used for branch conditions and for the SLTI and SLTIU instructions.
+In addition to arithmetic operations, the ALU performs comparisons between the two inputs, which are used for branch conditions and for the \verb|SLTI[U]/SLT| instructions.
 These comparisons are made visible through four flags: unsigned less-than and greater-than and signed less-than and greater-than.
 With these four flag outputs any of the signed and unsigned branch conditions can be supported:
 \begin{itemize}
@@ -341,22 +340,22 @@ This allows the modules to be simpler and makes the whole system more modular an
 The DPU fabric has not been implemented but the high-level design has been completed, as can be seen in Figure 6.
 
 \subsection{Control}
-\color{red}{Incomplete...}\color{black}\\
 The control is primarily separate from the DPU (apart from a few components such as the ALU control).
 This nicely separates the control from the rest of the CPU processing and makes a nice division in the design.
 We were able to do this by not considering pipelining, thus removing any forwarding registers and branch prediction modules from being interweaved into the DPU.
 
 However, because there is no pipelining, the controller needs to be aware of how long each instruction takes to execute.
-This is mostly separated into the six different instruction types--where each instruciton within an instruction type takes the same number of clock cycles to execute.
-For the current implementations, the instruction length is hardcoded into the controller. For instance, the controller will wait four clock cycles for an ADD to execute
-before continuing to the next instruction.
+This is mostly separated into the six different instruction types--where each instruction within an instruction type takes the same number of clock cycles to execute.
+For the current implementations, the instruction length is hardcoded into the controller.
+For instance, the controller will wait four clock cycles for an \verb|ADD| to execute before continuing to the next instruction.
 
-The controller also has support of pausing and single-stepping.
-This greatly improves the debugging of the device.
-This is useful not only during hardware design of the CPU but also when writing software to run on the CPU.
-Currently, however, there is no proper I/O support, so there are dedicated buttons on the FPGA board to control the single-stepping.
-Thus, single-stepping cannot be controlled via a software debugger.
-This is planned for future work.
+Some additional control registers such as an "exception-flags" register and a \verb|FENCE| register were also introduced, shown in blue in Figure 5.
+These were needed to support the basic RV32I control instructions \verb|FENCE, ECALL,| and \verb|EBREAK|.
+While these are not fully implemented, \verb|FENCE| and \verb|ECALL| primarily functioning as \verb|NOP|s with \verb|EBREAK| functioning as a \verb|HALT|, they are implemented enough to encourage future support.
+The reason behind not fully implementing them is they are primarily used for privileged execution and multi-controller memory access--both of which are not applicable to this design.
+
+The controller is also designed to have support of halting and single-stepping via the \verb|EBREAK| instruction, though this is reserved for future work.
+But implementing the ability to single-step through instructions/pipeline stages in the future will greatly improve the ability to debug this design.
 
 \section{Testing \& Design Review}
 To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
