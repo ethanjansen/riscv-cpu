@@ -173,6 +173,8 @@ Because this does not yet apply to this project, the predecessor/successor I/O a
 Futhermore, the \verb|ECALL| instruction is treated as a \verb|NOP| while the \verb|EBREAK| instruction is treated as a \verb|HALT| for some possible future hardware-controlled halt and single-step (where CPU operation automatically halts between instructions or between pipeline stages) support.
 
 The deep understanding of these instructions is pivotal to this project and drives the data path unit (DPU) and controller implementations.
+Currently, the controller design is left for future work, however, the complete DPU block diagram, as designed based on these RV32I instructions, is given in the appendix.
+The design criteria for the individual DPU stages is described next.
 
 \section{Implementation}
 \subsection{Overview}
