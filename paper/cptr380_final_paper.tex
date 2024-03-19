@@ -22,7 +22,12 @@
 \maketitle
 
 \begin{abstract}
-\color{red}{TBD}
+This project aimed to implement the RISC-V RV32I ISA specification in VHDL on a Xilinx Artix-7 FPGA.
+A high-level design of the data path unit was completed and most of its core features were implemented.
+The control logic, along with some aspects of the DPU still need to be completed.
+This project provided those involved with valuable knowledge about designing and implementing a register-based CPU.
+Additionally, it provided them with the opportunity to learn VHDL testbenches, which served as a great time-saver in their testing of the completed components.
+Although the authors were not able to accomplish their lofty project goals, they were able to create a solid foundation from which the project can be continued in the future--which both authors hope to do.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -341,26 +346,33 @@ This allows the modules to be simpler and makes the whole system more modular an
 The DPU fabric has not been implemented but the high-level design has been completed, as can be seen in Figure 6.
 
 \subsection{Control}
-\color{red}{Incomplete...}\color{black}\\
+The control logic, seen in disembodied form in Figure 6, is the "brains" of the CPU.
+It is what operates the DPU and flips all the muxes.
+The control logic takes a few inputs including large portions of the instructions, flags from the ALU, and exception flags.
+Using this data, it computes the control signals that manipulate the DPU modules and the DPU fabric to make to DPU function as one cohesive unit.
+The control logic is not implemented in VHDL but its control signals, as well as its input data, can be seen in Figure 6.
+The implementation of the control logic is effectively a complex finite state machine (FSM) that transitions to states based on inputs.
+These transitions or states (depending on if the FSM is a Mealy or a Moore machine) cause the control signals to change.
+Due to the complexity of the FSM required to control the DPU, implementing this control FSM will be challenging.
+
 The control is primarily separate from the DPU (apart from a few components such as the ALU control).
-This nicely separates the control from the rest of the CPU processing and makes a nice division in the design.
+This nicely separates the control from the rest of the CPU processing and makes a nice division in the design which makes it easier to understand and simpler to build.
 We were able to do this by not considering pipelining, thus removing any forwarding registers and branch prediction modules from being interweaved into the DPU.
 
 However, because there is no pipelining, the controller needs to be aware of how long each instruction takes to execute.
-This is mostly separated into the six different instruction types--where each instruciton within an instruction type takes the same number of clock cycles to execute.
+This is mostly separated into the six different instruction types--where each instruction within an instruction type takes the same number of clock cycles to execute.
 For the current implementations, the instruction length is hardcoded into the controller. For instance, the controller will wait four clock cycles for an ADD to execute
 before continuing to the next instruction.
 
-The controller also has support of pausing and single-stepping.
-This greatly improves the debugging of the device.
+The controller also should have support pausing and single-stepping.
+This would greatly improve the ease of debugging the device.
 This is useful not only during hardware design of the CPU but also when writing software to run on the CPU.
-Currently, however, there is no proper I/O support, so there are dedicated buttons on the FPGA board to control the single-stepping.
-Thus, single-stepping cannot be controlled via a software debugger.
-This is planned for future work.
+The current high-level design implements single-step with dedicated buttons on the FPGA board.
+As a result, single-stepping cannot be controlled via a software debugger, which would be a more polished implementation.
 
 \section{Testing \& Design Review}
 To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
-This can be done one of two ways: implementing testbenches in either VHDL or Python using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
+This could be done one of two ways: implementing testbenches in either VHDL or Python using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
 Two compelling options for implementing testbenches are utelizing the VHDL testbench tools built into ISE or using cocotb.
 Testbenches are definitely the prefered way to test since they cut out some of the opportunity for error that comes from setting switches and reading LEDs.
 Additionally, they allow for automated pass/fail tests and provide timing diagrams, which simplify debugging significantly compared to testing on hardware.
@@ -372,7 +384,17 @@ Since both authors are already familiar with Xilinx ISE for its synthesis and FP
 The ISE VHDL testbenches were fairly simple to learn and using them for component testing saved the authors a significant amount of time.
 
 \section{Conclusion}
-\color{red}{TBD}\color{black}
+This project has been an enjoyable learning experience for both the authors.
+They did not accomplish their desired goals but were able to implement some core aspects of the RV32I specification.
+Such core components include the program counter, instruction memory, the register block, and the ALU.
+Even the though the DPU is not fully implemented, most of the core components are implemented and the high-level design is complete.
+All that is left to complete the DPU is implement data memory, I/O virtual memory, and the DPU fabric.
+After the DPU is complete, the only thing that remains is the control logic.
+This would take a significant amount of time but is achievable given the authors previous experience with their previous accumulator-based CPU design.
+The main limiting factor of this project was time.
+This project is quite substantial and, given the busy schedule of both of the authors, they were not able to spend the time required to bring this project to its functional milestone.
+Both authors hope to continue this project and bring it to a functional state when they have more time.
+
 
 {\appendices
 \section*{Complete Data Path Unit Block Diagram}
