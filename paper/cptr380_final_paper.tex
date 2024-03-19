@@ -31,49 +31,51 @@ ISA, RISC, RISC-V, RV32I FPGA, VHDL.
 
 
 \section{Introduction}
-\IEEEPARstart{S}{ince} designing a custom ALU-based CPU last quarter for the Intro to Digital Design class, 
+\IEEEPARstart{S}{ince} designing a custom accumulator-based CPU last quarter for the Intro to Digital Design class, 
 both of the authors developed an interest in implementing a more commonly supported instruction set architecture (ISA). 
 When presented with the opportunity to pursue a project related to computer architecture in their Computer Architecture class, 
-both authors jumped at the opportunity to implement another CPU design. They initially considered implementing the MIPS ISA, which was being studied in class, but, 
-after conducting more research, decided on implementing one of the RISC-V standard ISAs, RV32I. This decision was made based on the abundant 
-documentation for the RISC-V ISAs, RV32I's relative simplicity, the high commercial interest in these ISA specifications,
-and the interest in supporting open-source projects.
+both authors jumped at the opportunity to implement another CPU design.
+They initially considered implementing the MIPS (Microprocessor without Interlocked Pipelined Stages) ISA, which was being studied in class, but, 
+after conducting more research, decided on implementing one of the RISC-V standard ISAs, RV32I.
+This keeps with the RISC (Reduced Instruction Set Computer) design, and takes advantage of the abundant documentation for the RISC-V ISAs, RV32I's relative simplicity, the high commercial interest in these ISA specifications,
+and in the interest in supporting open-source projects.
 
-One of the dominant reasons many companies are developing RISC-V implementations is its open-source nature. 
-The dominant ISAs (x86, ARM, MIPS, etc.) all have steep licensing fees. The RISC-V ISAs, in comparison, are completely free. 
-Additionally, the closed-source nature of the dominant ISAs limit the freedom those designing implementation of these ISAs. 
+One of the dominant reasons many companies are developing RISC-V implementations is its open-source nature \cite{riscvhistory}. 
+The dominant ISAs (x86, ARM, MIPS, etc.) all have steep licensing fees.
+The RISC-V ISAs, in comparison, are completely free. 
 Having a completely open-source ISA just makes sense--it lowers the barrier to entry for designing hardware to implement standard 
 ISAs and allows for more innovation in the realm of CPU design.  
 
 \section{A Brief Introduction to RISC-V}
 The original design of RISC-V was begun in 2010 at the University of California, Berkeley. 
-It was designed not only as an academic learning aid but also a set of ISAs that could have commercial viability. 
-As its name suggests, RISC-V is a RISC (Reduced Instruction Set Computer) architecture. 
+It was designed not only as an academic learning aid but also as a set of ISAs that could have commercial viability \cite{riscvhistory}. 
+As its name suggests, RISC-V is a RISC architecture. 
 This means, in comparision to CISC (Complex Instruction Set Computer) ISAs, RISC ISAs have simple instructions. 
 This means more individual instructions will be required to complete a given task compared to CISC ISAs but also allows the 
-hardware implementation to be much simpler than that for CISC ISAs. In fact, implementations of x86-64, the most widely adopted CISC ISA, 
-breaks its CISC instructions into "microinstructions" which are easier to implement in hardware, similar to RISC ISAs.
+hardware implementation to be much simpler than that for CISC ISAs.
+In fact, even implementations of x86-64, the most widely adopted CISC ISA, breaks its CISC instructions into "microinstructions" which are easier to implement in hardware, similar to RISC ISAs \cite{cisctorisc}.
 
 RISC-V is not actually \textit{an} ISA but rather a collection of ISAs, 
-ranging from 32-bit to 128-bit standards and supporting various levels of complexity by way of extensions to the base ISAs. 
+ranging from 32-bit to 128-bit standards and supporting various levels of complexity by way of extensions to the base ISAs \cite{riscvunprovisioned}. 
 Some official extensions include the M extension which adds multiplication and division support, 
 the A extension which adds support for atomic instructions, and the F and D extensions which add support for single- and double-precision floating numbers, 
 respectively \cite{riscvunprovisioned}. Developers are encouraged to design their own compatible extensions to customize the base RISC-V ISA to their specific application.
 
-The RV32I ISA defines four main instruction types, with an additional two instruction types which are subsets of the main instruction types. They are as follows:
+The RV32I ISA defines four main instruction types, with an additional two instruction types which are subsets of the main instruction types \cite{riscvunprovisioned}.
+They are as follows:
 \begin{itemize}
   \item R-type: Supports integer register-register arithmetic operations
   \item I-type: Supports integer register-immediate arithmetic operations
   \item S-type: Supports store instructions
-  \item SB-type: Supports branch instructions
+  \item B-type (SB-type): Supports branch instructions
   \item U-type: Supports load upper immediate (\verb|LUI|) and add upper immediate to \verb|pc| (\verb|AUIPC|) instructions
-  \item UJ-type: Supports jump and link (\verb|JAL|) instructions
+  \item J-type (UJ-type): Supports jump and link (\verb|JAL|) instructions
 \end{itemize}
 
 
 In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
 RV32I is the RISC-V 32-bit base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
-Using this, the implemented microcontroller should easily support C code cross-compilation via clang.
+Using this, the implemented microcontroller should easily support C code cross-compilation via clang after future I/O library support.
 This will help test/debug the microcontroller during implementation.
 Even more notable, however, is this will greatly improve the accessibility of this project as a useful processor.
 
@@ -89,7 +91,7 @@ Because of time constraints these are items are not actively being pursued.
         simplify the control logic and data path unit (DPU).
     \item Multiplication \& Division: These are technically part of the M extension \cite{riscvunprovisioned} and thus are not high priorities.
         However, because \verb|IEEE.numeric_std| (the VHDL library) has built in support for multiplication and division this would not be difficult to add to
-        the existing arithment logic unit (ALU). The ALU would simply require another bit of control.
+        the existing arithmetic logic unit (ALU). The ALU would simply require another bit of control.
     \item Standard C Code Compilation Support: Basic C support is planned for this project, however exensive support is currently not guaranteed.
 \end{itemize}
 The authors intend to continue supporting this project by refining the design and implemented the discussed stretch goals.
@@ -109,14 +111,24 @@ Besides the different ISA support (the original accumulator-based CPU used a cus
 the switch to using a bank of registers is the most significant hardware design change between the two implementations.
 This change, however, is in keeping with the RV32I standard and allows for more flexibility when programming the CPU.
 
-\subsection{Instruction \& Data Memory}
+\subsection{Program Counter}
 \begin{figure}[!h]
-    \label{fig:instmemblock}
-    \centering
-    \includegraphics[width=5cm]{CPTR380_inst_mem.png}
-    \caption{Instruction Memory \& Program Counter with Preliminary Step \& Branch Support}
+  \label{fig:pc}
+  \centering
+  \includegraphics[width=5cm]{PC.jpg}
+  \caption{Program Counter with Branch \& Jump Support}
 \end{figure}
-Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \color{red}needs citation\color{black}.
+
+\subsection{Instruction Memory,  Data Memory, and I/O}
+\begin{figure}[!h]
+    \label{fig:memory}
+    \centering
+    \includegraphics[width=5cm]{IMEM.jpg}
+    \rule{7cm}{0.8pt}
+    \includegraphics[width=5cm]{DMEM-IO.jpg}
+    \caption{Instruction Memory (top). Data Memory with I/O Support (bottom).}
+\end{figure}
+Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \cite{amdblockram}.
 This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
 --the clock will not have to be further delayed as it may have been otherwise.
 
@@ -133,7 +145,7 @@ Because of this the goal to implement $2^{32}$ deep memory blocks, however there
 \begin{figure}[!h]
     \label{fig:regblock}
     \centering
-    \includegraphics[width=5cm]{CPTR380_registers.png}
+    \includegraphics[width=5cm]{REG.jpg}
     \caption{32-bit Register File}
 \end{figure}
 \color{red}{Incomplete..}\color{black}\\
@@ -144,8 +156,8 @@ Similar to the Data Memory implementation, the register block supports writing b
 \begin{figure}[!h]
     \label{fig:alublock}
     \centering
-    \includegraphics[width=5cm]{CPTR380_ALU.png}
-    \caption{ALU with ALU Control and Conrol Flag Output}
+    \includegraphics[width=5cm]{ALU.jpg}
+    \caption{ALU with Conrol Flag Output}
 \end{figure}
 The arithmetic logic unit is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
 Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
@@ -187,6 +199,14 @@ Furthermore, the $r<0$ flag is also zero-extended and output (via a mux) in orde
 or 0 if the first imput is less-than/greater-than the second input.
 
 \subsection{DPU Miscellaneous}
+\begin{figure}[!h]
+  \label{fig:dpumisc}
+  \centering
+  \includegraphics[width=5cm]{Misc1.jpg}
+  \rule{7cm}{0.8pt}
+  \includegraphics[width=5cm]{Misc2.jpg}
+  \caption{Stuff}
+\end{figure}
 \color{red}{TBD}\color{black}
 
 \subsection{Control}
@@ -220,50 +240,222 @@ However, cocotb was found to be difficult to configure and may be considered lat
 \color{red}{TBD}\color{black}
 
 {\appendices
-\section*{Complete CPU Block Diagrams}
-\color{red}{TBD}\color{black}
+\section*{Complete Data Path Unit Block Diagram}
+\begin{figure}[!h]
+  \label{fig:dpu}
+  \centering
+  \includegraphics[width=16cm, angle=270]{DPU.jpg}
+  \caption{Data Path Unity with Control Signals (blue)}
+\end{figure}
 
 \section*{VHDL Implementations}
 Sample:
 \color{red}{TBD due to current overfull issues...}\color{black}\\
-%\verbatiminput{../arithmetic_logic_unit.vhd}[breaklines] % this needs work
+\subsection{Program Counter}
 \begin{Verbatim}[breaklines]
-    library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
-
-entity program_counter is
-  port
-  (
-    clk        : in std_logic; --! Clock
-    reset      : in std_logic; --! Reset to 0
-    en         : in std_logic; --! Enable
-    br         : in std_logic; --! Branch
-    jump_value : in std_logic_vector(11 downto 0);
-    count      : out std_logic_vector(10 downto 0)
-  );
-end program_counter;
-
-architecture counter_signed of program_counter is
-  signal count_buf : signed(11 downto 0);
-begin
-  process (clk)
+  library IEEE;
+  use IEEE.std_logic_1164.all;
+  
+  entity program_counter is
+    port
+    (
+      clk   : in std_logic; --! Clock
+      reset : in std_logic; --! Reset to 0
+      en    : in std_logic; --! Enable
+      D     : in std_logic_vector(9 downto 0); --! New pc
+      Q     : out std_logic_vector(9 downto 0) --! Current pc
+    );
+  end program_counter;
+  
+  architecture pc of program_counter is
   begin
-    if rising_edge(clk) then
-      if reset = '1' then
-        count_buf <= to_signed(0, 12);
-      elsif br = '1' then
-        count_buf <= count_buf + signed(jump_value) - 1;
-      elsif en = '1' then
-        count_buf <= count_buf + 1;
-        if count_buf(11) = '1' then
-          count_buf <= to_signed(0, 12);
+    process (clk)
+    begin
+      if rising_edge(clk) then
+        if reset = '1' then
+          Q <= "0000000000";
+        elsif en = '1' then
+          Q <= D; --! When reset != 0 and en = 1
+        else
+          Q <= Q; --! When reset != 0 and en = 0
         end if;
       end if;
-    end if;
-  end process;
-  count <= std_logic_vector(unsigned(count_buf(10 downto 0)));
-end counter_signed;
+    end process;
+  
+  end pc;
+\end{Verbatim}
+\subsection{Instruction Memory}
+\begin{Verbatim}[breaklines]
+  library IEEE;
+  use IEEE.std_logic_1164.all;
+  use IEEE.numeric_std.all;
+  use IEEE.std_logic_textio.all;
+  use std.textio.all;
+  
+  entity rom_with_init is
+    port
+    (
+      clk  : in std_logic; --! Clock
+      en   : in std_logic; --! Enable
+      addr : in std_logic_vector(9 downto 0); --! Address
+      d    : out std_logic_vector(31 downto 0) --! Data Out
+    );
+  end rom_with_init;
+  
+  architecture rom of rom_with_init is
+    type rom_type is array(0 to 1023) of std_logic_vector(31 downto 0);
+  
+    impure function initRomFromFile(romFileName : in string) return rom_type is
+      file romFile                                : text is in romFileName;
+      variable romFileLine                        : line;
+      variable rom                                : rom_type;
+    begin
+      for i in rom_type'range loop
+        readline(romFile, romFileLine);
+        read(romFileLine, rom(i));
+      end loop;
+      return rom;
+    end function;
+  
+    signal rom : rom_type := initRomFromFile("rom.data");
+  begin
+    process (clk)
+    begin
+      if rising_edge(clk) then
+        if en = '1' then
+          d <= rom(to_integer(
+            unsigned(addr)));
+        end if;
+      end if;
+    end process;
+  end rom;
+\end{Verbatim}
+\subsection{ALU}
+\begin{Verbatim}[breaklines]
+  library IEEE;
+  use IEEE.STD_LOGIC_1164.all;
+  use IEEE.NUMERIC_STD.all;
+  
+  entity arithmetic_logic_unit is
+    port
+    (
+      ctrl               : in std_logic_vector(2 downto 0); --! From control module
+      data1_in, data2_in : in std_logic_vector(31 downto 0); --! Assuming immediate sign extensions happen outside of alu
+      data_out           : out std_logic_vector(31 downto 0);
+      flags              : out std_logic_vector(3 downto 0)
+    );
+  end arithmetic_logic_unit;
+  
+  architecture alu of arithmetic_logic_unit is
+    constant sel_add                         : std_logic_vector(2 downto 0) := "000";
+    constant sel_sll                         : std_logic_vector(2 downto 0) := "001";
+    constant sel_sub                         : std_logic_vector(2 downto 0) := "010";
+    constant sel_sra                         : std_logic_vector(2 downto 0) := "011";
+    constant sel_xor                         : std_logic_vector(2 downto 0) := "100";
+    constant sel_srl                         : std_logic_vector(2 downto 0) := "101";
+    constant sel_or                          : std_logic_vector(2 downto 0) := "110";
+    constant sel_and                         : std_logic_vector(2 downto 0) := "111";
+    signal nonzero_s, nonzero_u              : std_logic;
+    signal shift                             : std_logic_vector(4 downto 0);
+    signal sig_sra                           : std_logic_vector(31 downto 0);
+    signal sig_xor, sig_srl, sig_or, sig_and : std_logic_vector(31 downto 0);
+    signal sig_sll                           : unsigned(31 downto 0);
+    signal sig_add, sig_sub                  : signed(31 downto 0);
+    signal unsigned_ext_1, unsigned_ext_2    : std_logic_vector(32 downto 0);
+    signal sig_unsigned_comp                 : signed(32 downto 0);
+  
+  begin
+    -- signals all calculated to be muxed via ctrl
+  
+    -- logic
+    shift   <= data2_in(4 downto 0);
+    sig_add <= signed(data1_in) + signed(data2_in);
+    sig_sll <= shift_left(unsigned(data1_in), to_integer(unsigned(shift)));
+    sig_sub <= signed(data1_in) - signed(data2_in);
+    sig_sra <= std_logic_vector(shift_right(
+      signed(data1_in), to_integer(unsigned(shift))));
+    sig_xor <= data1_in xor data2_in;
+    sig_srl <= std_logic_vector(shift_right(
+      unsigned(data1_in), to_integer(unsigned(shift))));
+    sig_or  <= data1_in or data2_in;
+    sig_and <= data1_in and data2_in;
+  
+    nonzero_s <= '0' when sig_sub = X"00000000" else
+      '1'; --! Check difference is non-zero
+    flags(3)          <= (not sig_sub(31)) and nonzero_s; --! Positive and non-zero
+    flags(2)          <= sig_sub(31); --! Sign bit of signed subtraction operation
+    unsigned_ext_1    <= '0' & data1_in; --! Effectively create positive signed value from unsigned
+    unsigned_ext_2    <= '0' & data2_in; --! Effectively create positive signed value from unsigned
+    sig_unsigned_comp <= signed(unsigned_ext_1) - signed(unsigned_ext_2);
+    nonzero_u         <= '0' when sig_unsigned_comp = "000000000000000000000000000000000" else
+      '1'; --! Check difference is non-zero
+    flags(1) <= (not sig_unsigned_comp(32)) and nonzero_u;
+    flags(0) <= sig_unsigned_comp(32);
+    -- signal select mux
+    with ctrl select
+      data_out <=
+      std_logic_vector(sig_add) when sel_add,
+      std_logic_vector(sig_sll) when sel_sll,
+      std_logic_vector(sig_sub) when sel_sub,
+      sig_sra when sel_sra,
+      sig_xor when sel_xor,
+      sig_srl when sel_srl,
+      sig_or when sel_or,
+      sig_and when others;
+  end alu;
+\end{Verbatim}
+\subsection{Register File}
+\begin{Verbatim}[breaklines]
+  library IEEE;
+  use IEEE.std_logic_1164.ALL;
+  use IEEE.NUMERIC_STD.ALL;
+  
+  entity register_block is
+      port
+      (
+        clk               : in std_logic; --! Master clock
+        we                : in std_logic; --! Write enable
+        en                : in std_logic; --! Keeps Q_1 and Q_2 from changing
+        A_1, A_2, A_Write : in std_logic_vector(4 downto 0); --! Address inputs
+        D                 : in std_logic_vector(31 downto 0); --! Data in
+        Q_1, Q_2          : out std_logic_vector(31 downto 0) --! Data out
+      );
+  end register_block;
+  
+  architecture reg_blk of register_block is
+    type reg_type is array (31 downto 0) of std_logic_vector(31 downto 0);
+    signal REG : reg_type := (others=>(others=>'0'));
+  
+    
+  begin
+    process(clk)
+    begin
+      if rising_edge(clk) then
+        if en = '1' then
+          if we = '1' and A_Write /= "00000" then
+            REG(to_integer(unsigned(A_Write))) <= D;
+            if (A_Write = A_1) and (A_Write = A_2) then
+              Q_1 <= D;
+              Q_2 <= D;
+            elsif (A_Write = A_1) then
+              Q_1 <= D;
+              Q_2 <= REG(to_integer(unsigned(A_2)));
+            elsif (A_Write = A_2) then
+              Q_2 <= D;
+              Q_1 <= REG(to_integer(unsigned(A_1)));
+            else
+              Q_1 <= REG(to_integer(unsigned(A_1)));
+              Q_2 <= REG(to_integer(unsigned(A_2)));
+            end if;
+          else
+            Q_1 <= REG(to_integer(unsigned(A_1)));
+                 Q_2 <= REG(to_integer(unsigned(A_2)));
+          end if;
+                  
+        end if;
+      end if;
+    end process;
+  end reg_blk;
 \end{Verbatim}
 }
 
