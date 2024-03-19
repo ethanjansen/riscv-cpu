@@ -131,7 +131,7 @@ Because the implementation does not support all of RV32I's 32-bit ($2^{32}$) add
 The current implementation of instruction memory is untested.
 Currently, data memory is not implemented due to time constraints.
 When implemented, data memory will hold 1024 32-bit wide values and will support read and write.
-As per RV32I specification, data memory will support storing/loading halfwords and bytes.
+As per RV32I specification, data memory will support storing/loading word, halfwords, and bytes.
 \color{red}{Incomplete..}\color{black}\\
 \subsection{Register File}
 \begin{figure}[!h]
@@ -141,10 +141,17 @@ As per RV32I specification, data memory will support storing/loading halfwords a
     \caption{32-bit Register File}
 \end{figure}
 The implementation of the register block fully supports the RV32I specification.
-Register x0 is writable but is always holds zeros and the other generic registers (x1-x31) function properly.
+Register \verb|x0| is writable but, when read, always returns a vector of zeros and the other generic registers (\verb|x1|-\verb|x31|) function according to the RV32I specification.
+The control signals to the register block are \verb|write-enable| and \verb|enable|.
+These control signals are important as they lock the register block so nothing changes (\verb|enable|) or, when \verb|enable| is held high, allow writes to the registers (\verb|write-enable|).
+Locking the register block so nothing changes (using \verb|write-enable|) is important in this non-pipelined implementation where the values of different components need to remain
+ stable after being updated by an instruction for the remaining clock cycles required to complete that instruction.
+The register block is implemented using a write-first memory block which is an array of \verb|std_logic_vector|s, similar to how the instruction memory is implemented.
+Custom logic is implemented to allow for two registers to be read at once.
+
 This implementation has been tested using the VHDL testbenches built into ISE.
-Tests include reading and writing to registers, reading and writing to register x0, and writing to and reading from the same register.
-The register block is implemented using a write-first memory block which is an array of \verb|std_logic_vector|s, similar to how the memory is implemented.
+Tests include reading and writing to registers, reading and writing to register \verb|x0|, and writing to and reading from the same register.
+
 
 \subsection{ALU}
 \begin{figure}[!h]
@@ -157,7 +164,7 @@ The arithmetic logic unit (ALU) is a fully combinational block which will perfor
 Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
 the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block rather than directly from the instruction.
-In addition to arithmetic operations, the ALU performs comparisons between the two inputs, which are used for branch conditions and for SLTI and SLTIU.
+In addition to arithmetic operations, the ALU performs comparisons between the two inputs, which are used for branch conditions and for the SLTI and SLTIU instructions.
 These comparisons are made visible through four flags: unsigned less-than and greater-than and signed less-than and greater-than.
 With these four flag outputs any of the signed and unsigned branch conditions can be supported:
 \begin{itemize}
@@ -172,7 +179,7 @@ The set less-than instructions set the least-significant bit (LSB) of an otherwi
 The ALU has been tested using the VHDL testbenches built into ISE.
 All the core arithmetic functions have been tested.
 Additionally, the four comparison flags have been tested in all their combinations.
-One might expect full coverage testing of the flags to require $2^{4}$ tests but, since the flags are not independant, the total required tests drops to five.
+One might expect full coverage testing of the flags to require $2^{4}$ tests but, since the flags are not independant, the total number of required tests is reduced to five.
 
 This ALU Control block takes in \verb|opcode, funct3|, and \verb|funct7| from the encoded instruction and translates this into the necessary 3-bit ALU control signal.
 Separating this block also allows more easily decoding the necessary information from the six different \cite{riscvunprovisioned} instruction types.
@@ -221,12 +228,16 @@ This is planned for future work.
 
 \section{Testing \& Design Review}
 To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
-This can be done one of two ways: implementing testbenches in either VHDL or Python using cocotb or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
-Implementing testbenches is the ideal method of testing modules.
-Both the authors have experience using testing wrappers and reading the test results using the FPGA board.
-They hope to use the built-in testbench implementation build into Xilinx ISE, which is the program the authors use for synthesis and configuration of the the FPGA.
-They did consider using cocotb, which is a HDL testbench written in Python.
-However, cocotb was found to be difficult to configure and may be considered later on.
+This can be done one of two ways: implementing testbenches in either VHDL or Python using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
+Two compelling options for implementing testbenches are utelizing the VHDL testbench tools built into ISE or using cocotb.
+Testbenches are definitely the prefered way to test since they cut out some of the opportunity for error that comes from setting switches and reading LEDs.
+Additionally, they allow for automated pass/fail tests and provide timing diagrams, which simplify debugging significantly compared to testing on hardware.
+The VHDL testbench tools built into Xilinx ISE are relatively simple to use and auto generate the component imports.
+Additionally, the ISE testbench tools provide timing diagrams for the tests, which was found useful for this project.
+cocotb is a testbench suite which allows users to define testbenches in Python.
+It has many compelling features but the time required to setup and learn the tool was prohibitive.
+Since both authors are already familiar with Xilinx ISE for its synthesis and FPGA configuration tools, they opted to use the ISE testbench tools.
+The ISE VHDL testbenches were fairly simple to learn and using them for component testing saved the authors a significant amount of time.
 
 \section{Conclusion}
 \color{red}{TBD}\color{black}
