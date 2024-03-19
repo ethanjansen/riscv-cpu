@@ -82,6 +82,7 @@ Because of time constraints these are items are not actively being pursued.
         the existing arithmetic logic unit (ALU). The ALU would simply require another bit of control.
     \item Standard C Code Compilation Support: Basic C support is planned for this project, however exensive support is currently not guaranteed.
 \end{itemize}
+
 The authors intend to continue supporting this project by refining the design and implemented the discussed stretch goals.
  
 \section{Understanding RV32I}
@@ -95,6 +96,7 @@ They are as follows:
   \item U-type: Supports load upper immediate (\verb|LUI|) and add upper immediate to \verb|pc| (\verb|AUIPC|) instructions
   \item J-type (UJ-type): Supports jump and link (\verb|JAL|) instructions
 \end{itemize}
+
 While there are various types, they are structured in a way as to maintain as much consistency as possible.
 For instance, the opcode, destination register, and source registers are always located in the same part of the binary-coded instruction.
 Futhermore, the immediates are positioned as to keep the sign-extension bit in bit 31 of the instruction, and to keep the other bits of the immediates as consistent as possible.
@@ -182,6 +184,7 @@ This project's implementation of non-pipelined RV32I consists of a few core comp
     \item various other DPU components related to sign-extension, incrementing the program counter, branching, and routing signals
     \item a control module
 \end{itemize}
+
 Unlike the authors' previous CPU designs which used an accumulator-based design, 
 this implementation uses a register file with 32 32-bit wide registers.
 Besides the different ISA support (the original accumulator-based CPU used a custom ISA),
@@ -205,6 +208,7 @@ This change, however, is in keeping with the RV32I standard and allows for more 
     \includegraphics[width=5cm]{DMEM-IO.jpg}
     \caption{Instruction Memory (top). Data Memory with I/O Support (bottom).}
 \end{figure}
+
 Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|s \cite{amdblockram}.
 This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
 --the clock will not have to be further delayed as it may have been otherwise.
@@ -228,6 +232,7 @@ As per RV32I specification, data memory will support storing/loading word, halfw
     \includegraphics[width=5cm]{REG.jpg}
     \caption{32-bit Register File}
 \end{figure}
+
 The implementation of the register block fully supports the RV32I specification.
 Register \verb|x0| is writable but, when read, always returns a vector of zeros and the other generic registers (\verb|x1|-\verb|x31|) function according to the RV32I specification.
 The control signals to the register block are \verb|write-enable| and \verb|enable|.
@@ -248,6 +253,7 @@ Tests include reading and writing to registers, reading and writing to register 
     \includegraphics[width=5cm]{ALU.jpg}
     \caption{ALU with Conrol Flag Output}
 \end{figure}
+
 The arithmetic logic unit (ALU) is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
 Shown in Table I are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
@@ -256,12 +262,13 @@ In addition to arithmetic operations, the ALU performs comparisons between the t
 These comparisons are made visible through four flags: unsigned less-than and greater-than and signed less-than and greater-than.
 With these four flag outputs any of the signed and unsigned branch conditions can be supported:
 \begin{itemize}
-    \item BEQ: equals
-    \item BNE: not equals
-    \item BLT \& BLTU: less-than
-    \item BGE \& BGEU: greater-than
+    \item \verb|BEQ|: equals
+    \item \verb|BNE|: not equals
+    \item \verb|BLT| \& \verb|BLTU|: less-than
+    \item \verb|BGE| \& \verb|BGEU|: greater-than
 \end{itemize}
-Furthermore, SLT, SLTU, SLTI \& SLTIU (set less-than) instructions can be supported by selecting between the signed and unsigned less-than flags (using a mux), zero-extending the one-bit value, and selecting it as an output (via another mux) instead of the ALU's arithmetic result.
+
+Furthermore, \verb|SLT, SLTU, SLTI| \& \verb|SLTIU| (set less-than) instructions can be supported by selecting between the signed and unsigned less-than flags (using a mux), zero-extending the one-bit value, and selecting it as an output (via another mux) instead of the ALU's arithmetic result.
 The set less-than instructions set the least-significant bit (LSB) of an otherwise zero 32-bit vector to 1 or 0 depending on if the first input is less-than/greater-than the second input, respectively.
 
 The ALU has been tested using the VHDL testbenches built into ISE.
