@@ -104,7 +104,8 @@ This project's implementation of non-pipelined RV32I consists of a few core comp
     \item various other DPU components related to sign-extension, incrementing the program counter, branching, and routing signals
     \item a control module
 \end{itemize}
-Unlike the authors' previous CPU designs which used an accumulator-based design, this implementation uses a register file with 32 32-bit wide registers.
+Unlike the authors' previous CPU designs which used an accumulator-based design, 
+this implementation uses a register file with 32 32-bit wide registers.
 Besides the different ISA support (the original accumulator-based CPU used a custom ISA),
 the switch to using a bank of registers is the most significant hardware design change between the two implementations.
 This change, however, is in keeping with the RV32I standard and allows for more flexibility when programming the CPU.
@@ -116,7 +117,7 @@ This change, however, is in keeping with the RV32I standard and allows for more 
     \includegraphics[width=5cm]{CPTR380_inst_mem.png}
     \caption{Instruction Memory \& Program Counter with Preliminary Step \& Branch Support}
 \end{figure}
-Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \color{red}needs citation\color{black}.
+Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|s \color{red}needs citation\color{black}.
 This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
 --the clock will not have to be further delayed as it may have been otherwise.
 
@@ -126,9 +127,12 @@ Without the additional support baked into the data memory,
 an additional register would need to be added to temporarily hold the upper bits so that they do not get overwritten--this would require additional clock cycles to implement.
 
 The instruction memory has been implemented and holds a maximum of 1024 32-bit instructions.
-As of now the instruction and data memory depth is not defined, however RV32I supports 32-bit addresses.
-Because of this the goal to implement $2^{32}$ deep memory blocks, however there may be some currently unkown limitation of the FPGAs used for testing.
-
+Because the implementation does not support all of RV32I's 32-bit ($2^{32}$) addresses, the lower ten bits are masked and are used as the instruction memory address.
+The current implementation of instruction memory is untested.
+Currently, data memory is not implemented due to time constraints.
+When implemented, data memory will hold 1024 32-bit wide values and will support read and write.
+As per RV32I specification, data memory will support storing/loading halfwords and bytes.
+\color{red}{Incomplete..}\color{black}\\
 \subsection{Register File}
 \begin{figure}[!h]
     \label{fig:regblock}
@@ -136,9 +140,11 @@ Because of this the goal to implement $2^{32}$ deep memory blocks, however there
     \includegraphics[width=5cm]{CPTR380_registers.png}
     \caption{32-bit Register File}
 \end{figure}
-\color{red}{Incomplete..}\color{black}\\
-Similar to the Data Memory implementation, the register block supports writing byte and half-words in addition to full words.
-\textbf{Note:} this might be changed as when a register is written to the full register is overwritten regardless, even when only writing bytes and half-words.
+The implementation of the register block fully supports the RV32I specification.
+Register x0 is writable but is always holds zeros and the other generic registers (x1-x31) function properly.
+This implementation has been tested using the VHDL testbenches built into ISE.
+Tests include reading and writing to registers, reading and writing to register x0, and writing to and reading from the same register.
+The register block is implemented using a write-first memory block which is an array of \verb|std_logic_vector|s, similar to how the memory is implemented.
 
 \subsection{ALU}
 \begin{figure}[!h]
@@ -147,10 +153,26 @@ Similar to the Data Memory implementation, the register block supports writing b
     \includegraphics[width=5cm]{CPTR380_ALU.png}
     \caption{ALU with ALU Control and Conrol Flag Output}
 \end{figure}
-The arithmetic logic unit is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
+The arithmetic logic unit (ALU) is a fully combinational block which will perform the desired arithmetic operation based on the input control lines.
 Shown in Table \ref{table:ALUOps} are the main operations the ALU is required to support. Because there are various instructions associated with the same
 arithmetic operation (such as needing to determine the address used for load and store using ADD) the control line into the ALU is only 3-bits wide in order to support
-the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block.
+the eight different arithmetic operations, but the actual control signal is determined from a separate "ALU Control" block rather than directly from the instruction.
+In addition to arithmetic operations, the ALU performs comparisons between the two inputs, which are used for branch conditions and for SLTI and SLTIU.
+These comparisons are made visible through four flags: unsigned less-than and greater-than and signed less-than and greater-than.
+With these four flag outputs any of the signed and unsigned branch conditions can be supported:
+\begin{itemize}
+    \item BEQ: equals
+    \item BNE: not equals
+    \item BLT \& BLTU: less-than
+    \item BGE \& BGEU: greater-than
+\end{itemize}
+Furthermore, SLT, SLTU, SLTI \& SLTIU (set less-than) instructions can be supported by selecting between the signed and unsigned less-than flags (using a mux), zero-extending the one-bit value, and selecting it as an output (via another mux) instead of the ALU's arithmetic result.
+The set less-than instructions set the least-significant bit (LSB) of an otherwise zero 32-bit vector to 1 or 0 depending on if the first input is less-than/greater-than the second input, respectively.
+
+The ALU has been tested using the VHDL testbenches built into ISE.
+All the core arithmetic functions have been tested.
+Additionally, the four comparison flags have been tested in all their combinations.
+One might expect full coverage testing of the flags to require $2^{4}$ tests but, since the flags are not independant, the total required tests drops to five.
 
 This ALU Control block takes in \verb|opcode, funct3|, and \verb|funct7| from the encoded instruction and translates this into the necessary 3-bit ALU control signal.
 Separating this block also allows more easily decoding the necessary information from the six different \cite{riscvunprovisioned} instruction types.
@@ -175,16 +197,6 @@ Separating this block also allows more easily decoding the necessary information
     \caption{RV32I Base Arithmetic Operations Matched to the Instructions}
 \end{table}
 
-The ALU also outputs flags indicating if the result is less than or greater than zero.
-With these two flag outputs any of the branch conditions can be supported:
-\begin{itemize}
-    \item BEQ: equals
-    \item BNE: not equals
-    \item BLT \& BLTU: less-than
-    \item BGE \& BGEU: greater-than
-\end{itemize}
-Furthermore, the $r<0$ flag is also zero-extended and output (via a mux) in order to support the SLT \& SLTI (set less-than) instructions--which set a register to 1
-or 0 if the first imput is less-than/greater-than the second input.
 
 \subsection{DPU Miscellaneous}
 \color{red}{TBD}\color{black}
