@@ -34,12 +34,12 @@ ISA, RISC, RISC-V, RV32I FPGA, VHDL.
 \IEEEPARstart{S}{ince} designing a custom ALU-based CPU last quarter for the Intro to Digital Design class, 
 both of the authors developed an interest in implementing a more commonly supported instruction set architecture (ISA). 
 When presented with the opportunity to pursue a project related to computer architecture in their Computer Architecture class, 
-both authors jumped at the opportunity to implement another CPU design. They initially considered implementing the MIPS ISA but, 
+both authors jumped at the opportunity to implement another CPU design. They initially considered implementing the MIPS ISA, which was being studied in class, but, 
 after conducting more research, decided on implementing one of the RISC-V standard ISAs, RV32I. This decision was made based on the abundant 
 documentation for the RISC-V ISAs, RV32I's relative simplicity, the high commercial interest in these ISA specifications,
 and the interest in supporting open-source projects.
 
-One of the dominant reasons many companies are developing RISC-V implementations is it open-source nature. 
+One of the dominant reasons many companies are developing RISC-V implementations is its open-source nature. 
 The dominant ISAs (x86, ARM, MIPS, etc.) all have steep licensing fees. The RISC-V ISAs, in comparison, are completely free. 
 Additionally, the closed-source nature of the dominant ISAs limit the freedom those designing implementation of these ISAs. 
 Having a completely open-source ISA just makes sense--it lowers the barrier to entry for designing hardware to implement standard 
@@ -72,7 +72,7 @@ The RV32I ISA defines four main instruction types, with an additional two instru
 
 
 In this project, revision 2.1 of the RV32I unprivileged ISA will be implemented in VHDL and tested on a Xilinx Artix 7 FPGA (Field-Programmable Gate Array). 
-RV32I is the RISC-V base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
+RV32I is the RISC-V 32-bit base integer ISA and implements the core functionality of the RISC-V architecture family \cite{riscvunprovisioned}.
 Using this, the implemented microcontroller should easily support C code cross-compilation via clang.
 This will help test/debug the microcontroller during implementation.
 Even more notable, however, is this will greatly improve the accessibility of this project as a useful processor.
@@ -81,16 +81,16 @@ Even more notable, however, is this will greatly improve the accessibility of th
 The following goals would all improve the design, however are not necessary to meet a basic RV32I implementation.
 Because of time constraints these are items are not actively being pursued.
 \begin{itemize}
-    \item I/O: I/O support is not part of RV32I. For this reasoning an extension, or a co-processor, would be needed for proper implementation.
+    \item I/O: I/O support is not part of RV32I. Because of this, an extension, or a co-processor, would be needed for proper implementation.
         For these reasons, proper I/O implementation is a stretch goal. However, because basic I/O support is required for testing/debugging, it will be unofficially
-        implemented for these reasons.
-    \item Pipelining: Although RV32 supports pipelining, this project's implemetation will not implement this feature due to projected time constraints.
+        implemented.
+    \item Pipelining: Although RV32I supports pipelining, this project's implemetation will not implement this feature due to projected time constraints.
         Pipelining is not necessary to meet ISA requirements, and the lack of pipelining will only increase the clock cycles per instruction (CPI) but will greatly
         simplify the control logic and data path unit (DPU).
     \item Multiplication \& Division: These are technically part of the M extension \cite{riscvunprovisioned} and thus are not high priorities.
         However, because \verb|IEEE.numeric_std| (the VHDL library) has built in support for multiplication and division this would not be difficult to add to
         the existing arithment logic unit (ALU). The ALU would simply require another bit of control.
-    \item Standard C Code Compilation Support: Basic C support is planned for this project, however exensive support is currently not guarnateed.
+    \item Standard C Code Compilation Support: Basic C support is planned for this project, however exensive support is currently not guaranteed.
 \end{itemize}
 The authors intend to continue supporting this project by refining the design and implemented the discussed stretch goals.
  
@@ -116,7 +116,7 @@ This change, however, is in keeping with the RV32I standard and allows for more 
     \includegraphics[width=5cm]{CPTR380_inst_mem.png}
     \caption{Instruction Memory \& Program Counter with Preliminary Step \& Branch Support}
 \end{figure}
-Each memory (instruciton and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \color{red}needs citation\color{black}.
+Each memory (instruction and data) block was implemented in VHDL using AMD's write-first memory example using an array of \verb|std_logic_vector|'s \color{red}needs citation\color{black}.
 This allows for quick implementation; furthermore, it ensures that the memory blocks will be mapped to a physical FPGA memory block for improved performance
 --the clock will not have to be further delayed as it may have been otherwise.
 
@@ -125,6 +125,7 @@ This is to support the \verb|sb| and \verb|sh| instructions as they do not overw
 Without the additional support baked into the data memory,
 an additional register would need to be added to temporarily hold the upper bits so that they do not get overwritten--this would require additional clock cycles to implement.
 
+The instruction memory has been implemented and holds a maximum of 1024 32-bit instructions.
 As of now the instruction and data memory depth is not defined, however RV32I supports 32-bit addresses.
 Because of this the goal to implement $2^{32}$ deep memory blocks, however there may be some currently unkown limitation of the FPGAs used for testing.
 
