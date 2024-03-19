@@ -373,16 +373,18 @@ But implementing the ability to single-step through instructions/pipeline stages
 
 \section{Testing \& Design Review}
 To verify this project's RISC-V implementation is valid, a few methods can be used. First of all, the individual modules must be tested in isolation.
-This could be done one of two ways: implementing testbenches in either VHDL or Python using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
-Two compelling options for implementing testbenches are utelizing the VHDL testbench tools built into ISE or using cocotb.
-Testbenches are definitely the prefered way to test since they cut out some of the opportunity for error that comes from setting switches and reading LEDs.
+This could be done one of two ways: implement testbenches in either VHDL using either simulation testbenches or by creating testing wrappers which provide inputs to the modules and display the outputs on either the LEDs, seven-segment display, or digital pins on the FPGA board.
+In their previous designs, the authors solely tested their designs using testing wrappers and running the tests on hardware.
+This method of testing took copious amounts of time (partially realted to ISE's long synthesis times) and was tedious.
+Some tests need to be done on hardware either using wrappers or by testing a fully functioning design.
+For any testing that does not have to be done on hardware, testbenches are definitely the prefered way to test since they cut out some of the opportunity for error that comes from setting switches and reading LEDs.
 Additionally, they allow for automated pass/fail tests and provide timing diagrams, which simplify debugging significantly compared to testing on hardware.
 The VHDL testbench tools built into Xilinx ISE are relatively simple to use and auto generate the component imports.
 Additionally, the ISE testbench tools provide timing diagrams for the tests, which was found useful for this project.
-cocotb is a testbench suite which allows users to define testbenches in Python.
-It has many compelling features but the time required to setup and learn the tool was prohibitive.
 Since both authors are already familiar with Xilinx ISE for its synthesis and FPGA configuration tools, they opted to use the ISE testbench tools.
 The ISE VHDL testbenches were fairly simple to learn and using them for component testing saved the authors a significant amount of time.
+
+Because the project was not completed, there has been no design review.
 
 \section{Conclusion}
 This project has been an enjoyable learning experience for both the authors.
